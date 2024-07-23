@@ -1,0 +1,32 @@
+{% for prod in products %}
+<div class="col-lg-4 col-md-6 col-sm-6 productData">
+    {%csrf_token%}
+    <div class="product__item">
+        <a href="{%url 'productdetail' prod.product.id%}">
+            <div class="product__item__pic set-bg" data-setbg="{{ prod.product.primary_image.url }}">
+                {% if prod.out_of_stock %}
+                <span class="label text-danger">Out of Stock</span>
+                {%endif%}
+            </div>
+        </a>
+        <div class="product__item__text">
+            <input type="hidden" value="{{prod.product.id}}" class="productid">
+
+            <h6>{{ prod.product.product_name }}</h6>
+            <button type="button" class="add-cart btn btn-danger btn-sm addtowishlistbtn">Add To wishlist <i
+                    class="bi bi-heart-fill"></i></button>
+            <div class="rating">
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star"></i>
+            </div>
+            <h5>₹{{ prod.product.get_discounted_price }}</h5><span>
+                <p>{% if prod.product.discount %}({{prod.product.discount}}%off){%endif%}</p>
+            </span>
+        </div>
+    </div>
+
+</div>
+{% endfor %}

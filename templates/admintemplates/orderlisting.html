@@ -1,0 +1,162 @@
+{% extends "adminbase.html" %}
+{% block content %}
+
+<div class="page-wrapper">
+    <div class="content">
+        <div class="row">
+            <div class="col-sm-4 col-3">
+                <h4 class="page-title">Order Details</h4>
+            </div>
+        </div>
+        {% if messages %}
+        <div class="row">
+            <div class="col-md-12">
+                {% for message in messages %}
+                <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %} alert-dismissible">
+                    <a href="#" class="close" data-bs-dismiss="alert" aria-label="close">&times;</a>
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        <div class="row filter-row">
+            <div class="col-sm-6 col-md-3">
+                <div class="form-group form-focus">
+                    <label class="focus-label">Order ID</label>
+                    <input type="text" class="form-control floating">
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-3">
+                <div class="form-group form-focus select-focus">
+                    <label class="focus-label">Status</label>
+                    <select class="select floating">
+                        <option>Select Status</option>
+                        {% for status, label in status_choices %}
+                        <option value="{{ status }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-3">
+                <a href="#" class="btn btn-success btn-block"> Search </a>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="table-responsive">
+                    <table class="table table-striped custom-table">
+                        <thead>
+                            <tr>
+                                <th style="min-width:100px;">Order ID</th>
+                                <th>Customer</th>
+                                <th>Delivery Address</th>
+                                <th>Order Date</th>
+                                <th style="min-width: 110px;">Status</th>
+                                <th>Total</th>
+                                <th class="text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order_with_items in orders_with_items %}
+                            <tr>
+                                <td><h2>{{ order_with_items.order.id }}</h2></td>
+                                <td>{{ order_with_items.order.address_name }}</td>
+                                <td>{{order_with_items.order.address_name}}<br>
+                                    {{order_with_items.order.address_house_no}} {{order_with_items.order.address_street}}<br>
+                                    {{order_with_items.order.address_state}},{{order_with_items.order.address_city}} {{order_with_items.order.address_pincode}}<br></td>
+                                <td>{{ order_with_items.order.created_at|date:"Y-m-d" }}</td>
+                                <td>
+                                    <span class="custom-badge {% if order_with_items.order.status == 'Cancelled' or order_with_items.order.status == 'Returned' %}status-red{% elif order_with_items.order.status == 'Delivered' %}status-green{% else %}status-blue{% endif %}">{{ order_with_items.order.status }}</span>
+                                </td>
+                                <td>${{ order_with_items.order.total_price }}</td>
+                                <td class="text-right">
+                                    {% if  order_with_items.order.status == 'Pending' or order_with_items.order.status == 'Shipped' or order_with_items.order.status == 'Out for Delivery'%}
+                                    <a href="#change_status-{{ order_with_items.order.id }}" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#change_status-{{ order_with_items.order.id }}">Change Status</a>
+                                    {% endif %}
+                                    <a href="#view_order-{{ order_with_items.order.id }}" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#view_order-{{ order_with_items.order.id }}">View Details</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modals for changing order status -->
+{% for order_with_items in orders_with_items %}
+<div id="change_status-{{ order_with_items.order.id }}" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <h3>Change Order Status</h3>
+                <form action="{% url 'change_order_status' order_with_items.order.id %}" method="POST">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="status">Select Status</label>
+                        <select class="form-control" id="status" name="status">
+                            {% for status, label in status_choices %}
+                            <option value="{{ status }}" {% if order_with_items.order.status == status %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="m-t-20"> 
+                        <a href="#" class="btn btn-white" data-bs-dismiss="modal">Close</a>
+                        <button type="submit" class="btn btn-primary">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<!-- Modals for viewing order details -->
+{% for order_with_items in orders_with_items %}
+<div id="view_order-{{ order_with_items.order.id }}" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body">
+                <h3>Order Details for Order ID: {{ order_with_items.order.id }}</h3>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Product Name</th>
+                            <th>Image</th>
+                            <th>Ordered Quantity</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in order_with_items.items %}
+                        <tr data-order-id="{{item.order_id}}" data-product-id="{{item.product.id}}">
+                            <input type="hidden" value="{% url 'approveReturn'%}" name="approveReturnUrl">
+                            <td >{{ item.product.product_name }}</td>
+                            <td><img src="{{ item.product.primary_image.url }}" alt="{{ item.product.product_name }}" width="50"></td>
+                            <td>{{ item.quantity }}</td>
+                            <td>{{item.status}}</td>
+                            {%if item.status == "Return Requested"%}
+                            <td><button class="btn btn-primary btn-sm productReturnApproveBtn" value="Return Approved">Approve Return</button></td>
+                            {%elif item.status == "Return Approved"%}
+                            <td><button class="btn btn-primary btn-sm productReturnApproveBtn" value="Returned">Returned</button></td>
+                            {%else%}
+                            <td></td>
+                            {%endif%}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div class="m-t-20 text-center">
+                    <a href="#" class="btn btn-white" data-bs-dismiss="modal">Close</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+{% endblock %}

@@ -1,0 +1,209 @@
+{% extends "adminbase.html" %}
+{%block content%}
+
+<div class="page-wrapper">
+    <div class="content">
+        <div class="container">
+            <div class="row mb-4">
+                <div class="col">
+                    <form id="reportForm" class="form-inline" action="{% url 'generate_pdf'%}" method="get">
+                        <label class="my-1 mr-2" for="reportType">Report Type:</label>
+                        <select class="form-select my-1 mr-sm-2" id="reportType" name="reportType">
+                            <option value="daily">Daily</option>
+                            <option value="monthly">Monthly</option>
+                            <option value="yearly">Yearly</option>
+                            <option value="custom">Custom Date Range</option>
+                        </select>
+        
+                        <div id="customDateRange" style="display:none;">
+                            <label class="my-1 mr-2" for="fromDate">From:</label>
+                            <input type="date" class="form-control my-1 mr-sm-2" id="fromDate" name="fromDate">
+        
+                            <label class="my-1 mr-2" for="toDate">To:</label>
+                            <input type="date" class="form-control my-1 mr-sm-2" id="toDate" name="toDate">
+                        </div>
+                        <button type="submit" class="btn btn-danger mt-3" id="generateReport">Generate Report</button>
+                    </form>
+                </div>
+            </div>
+            <div class="row">
+                <!-- Graphs -->
+                <div class="col-lg-6">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+                <div class="col-lg-6">
+                    <canvas id="productQuantityChart"></canvas>
+                </div>
+            </div>
+            <div class="row mt-5">
+                <!-- Total Orders -->
+                <div class="col-lg-2 col-sm-6">
+                    <div class="card text-white bg-primary mb-3">
+                        <div class="card-header">Total Orders</div>
+                        <div class="card-body">
+                            <h5 class="card-title text-white">{{total_orderCount}}</h5>
+                        </div>
+                    </div>
+                </div>
+                <!-- Total Revenue -->
+                <div class="col-lg-2 col-sm-6">
+                    <div class="card text-white bg-success mb-3">
+                        <div class="card-header">Total Revenue</div>
+                        <div class="card-body">
+                            <h5 class="card-title text-white">₹{{total_revenue}}</h5>
+                        </div>
+                    </div>
+                </div>
+                <!-- Top Selling Product -->
+                <div class="col-lg-4 col-sm-6">
+                    <div class="card text-white bg-warning mb-3">
+                        <div class="card-header">Top Selling Product</div>
+                        <div class="card-body">
+                            <h5 class="card-title text-white">{{ most_ordered_product }}</h5>
+                        </div>
+                    </div>
+                </div>
+                <!-- Pending Orders -->
+                <div class="col-lg-2 col-sm-6">
+                    <div class="card text-white bg-danger mb-3">
+                        <div class="card-header">Pending Orders</div>
+                        <div class="card-body">
+                            <h5 class="card-title text-white">{{pending_order}}</h5>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-sm-6">
+                    <div class="card text-white bg-dark mb-3">
+                        <div class="card-header">Active Users</div>
+                        <div class="card-body">
+                            <h5 class="card-title text-white">{{active_users}}</h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Recent Orders -->
+                <div class="col-lg-12">
+                    <div class="card mb-3">
+                        <div class="card-header">Recent Orders</div>
+                        <div class="card-body">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Order ID</th>
+                                        <th>User</th>
+                                        <th>Total Price</th>
+                                        <th>Status</th>
+                                        <th>Order Placed Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for order in recent_orders%}
+                                    <tr>
+                                        <td>{{order.id}}</td>
+                                        <td>{{order.user.email}}</td>
+                                        <td>₹{{order.total_price}}</td>
+                                        <td>{{order.status}}</td>
+                                        <td>{{order.created_at|date:"d-m-Y"}}</td>
+                                    </tr>
+                                    {% endfor %}
+                                    <!-- Add more hard-coded rows as needed -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{%endblock%}
+
+{%block script%}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script type="application/json" id="revenue-data">
+    {{ revenue_data|safe }}
+</script>
+<script type="application/json" id="product-quantity-data">
+    {{ product_quantity_data|safe }}
+</script>
+<script>
+    document.getElementById('reportType').addEventListener('change', function () {
+        var customDateRange = document.getElementById('customDateRange');
+        if (this.value === 'custom') {
+            customDateRange.style.display = 'inline-flex';
+        } else {
+            customDateRange.style.display = 'none';
+        }
+    });
+    var revenueData = JSON.parse(document.getElementById('revenue-data').textContent);
+    var productQuantityData = JSON.parse(document.getElementById('product-quantity-data').textContent);
+
+    // Revenue Chart
+    var ctx1 = document.getElementById('revenueChart').getContext('2d');
+    var revenueChart = new Chart(ctx1, {
+        type: 'line',
+        data: {
+            labels: revenueData.labels, // e.g., ["Jan", "Feb", "Mar"]
+            datasets: [{
+                label: 'Total Revenue',
+                data: revenueData.values, // e.g., [10000, 20000, 15000]
+                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                x: {
+                    beginAtZero: true
+                },
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Product Quantity Chart
+    var ctx2 = document.getElementById('productQuantityChart').getContext('2d');
+    var productQuantityChart = new Chart(ctx2, {
+        type: 'bar',
+        data: {
+            labels: productQuantityData.labels, // e.g., ["Product A", "Product B"]
+            datasets: [{
+                label: 'Quantity Sold',
+                data: productQuantityData.values, // e.g., [500, 300]
+                backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                borderColor: 'rgba(153, 102, 255, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                x: {
+                    beginAtZero: true
+                },
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    document.getElementById('generateReportButton').addEventListener('click', function () {
+        var reportPeriod = document.getElementById('reportPeriod').value;
+        var fromDate = document.getElementById('fromDate').value;
+        var toDate = document.getElementById('toDate').value;
+
+        // Handle report generation logic here
+        console.log('Report Period:', reportPeriod);
+        if (reportPeriod === 'custom') {
+            console.log('From Date:', fromDate);
+            console.log('To Date:', toDate);
+        }
+    });
+</script>
+{%endblock%}

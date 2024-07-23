@@ -1,0 +1,206 @@
+{%extends 'userbasetemplate.html'%}
+{%block content%}
+<!-- Header Section End -->
+
+<!-- Hero Section Begin -->
+<section class="hero">
+    <div class="hero__slider owl-carousel">
+        <div class="hero__items set-bg" data-setbg="#">
+            <div class="container">
+                <div class="row">
+                    <div class="col-xl-5 col-lg-7 col-md-8">
+                        <div class="hero__text">
+                            <h6>Summer Collection</h6>
+                            <h2>Fall - Winter Collections 2030</h2>
+                            <p>A specialist label creating luxury essentials. Ethically crafted with an unwavering
+                                commitment to exceptional quality.</p>
+                            <a href="{%url 'shop'%}" class="primary-btn">Shop now <span class="arrow_right"></span></a>
+                            <div class="hero__social">
+                                <a href="#"><i class="fa fa-facebook"></i></a>
+                                <a href="#"><i class="fa fa-twitter"></i></a>
+                                <a href="#"><i class="fa fa-pinterest"></i></a>
+                                <a href="#"><i class="fa fa-instagram"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="hero__items set-bg" data-setbg="#">
+            <div class="container">
+                <div class="row">
+                    <div class="col-xl-5 col-lg-7 col-md-8">
+                        <div class="hero__text">
+                            <h6>Summer Collection</h6>
+                            <h2>Fall - Winter Collections 2030</h2>
+                            <p>A specialist label creating luxury essentials. Ethically crafted with an unwavering
+                                commitment to exceptional quality.</p>
+                            <a href="#" class="primary-btn">Shop now <span class="arrow_right"></span></a>
+                            <div class="hero__social">
+                                <a href="#"><i class="fa fa-facebook"></i></a>
+                                <a href="#"><i class="fa fa-twitter"></i></a>
+                                <a href="#"><i class="fa fa-pinterest"></i></a>
+                                <a href="#"><i class="fa fa-instagram"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Hero section ends -->
+<!-- shop by category -->
+<div class="promo">
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <div class="section_title_container text-center">
+                    <div class="section_title">Shop by Category</div>
+                </div>
+            </div>
+        </div>
+        <div class="row promo_container">
+            <!-- Promo Item -->
+            {%for category in categories%}
+            {%if category.is_active%}
+            <div class="col-md-2 col-lg-2 promo_col">
+                <div class="promo_item">
+                    <div class="promo_image">
+                        <img src="{{category.category_image.url}}" alt="">
+                    </div>
+                    <div class="promo_link"><a href="#">{{category.category_name}}</a></div>
+                </div>
+            </div>
+            {%endif%}
+            {%endfor%}
+
+        </div>
+    </div>
+</div>
+<!-- shop by category end -->
+<!-- Search Begin -->
+<div class="search-model">
+    <div class="h-100 d-flex align-items-center justify-content-center">
+        <div class="search-close-switch">+</div>
+        <form class="search-model-form">
+            <input type="text" id="search-input" placeholder="Search here.....">
+        </form>
+    </div>
+</div>
+<!-- Product card  -->
+<div class="container mt-5">
+    <div class="row">
+        <div class="col text-center">
+            <button class="btn btn-option" id="btn-best-sellers" onclick="showSection('best-sellers')">Best
+                Sellers</button>
+            <button class="btn btn-option" id="btn-new-arrivals" onclick="showSection('new-arrivals')">New
+                Arrivals</button>
+        </div>
+    </div>
+
+    <div id="best-sellers" class="product-section mt-4">
+        <div class="row">
+            <!-- Product Card -->
+            <div class="col-md-3">
+                <div class="card product-card">
+                    <div class="card-img-top">
+                        <img src="{{product.primary_image.url}}" class="img-fluid" alt="Product 1">
+                        <span class="badge bg-danger">Sale</span>
+                        <div class="overlay">
+                            <button class="btn btn-outline-light">Add to Cart <i class="bi bi-bag"></i></button>
+                            <button class="btn btn-outline-light"><i class="bi bi-heart"></i></button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">Black Half hand shirt</h5>
+                        <p class="card-text"><del>$100</del><span> $80</span></p>
+                        <div class="rating">
+                            ★★★★☆
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Repeat Product Cards -->
+        </div>
+    </div>
+
+</div>
+<!-- product card End -->
+<!-- Categories Section Begin -->
+<section class="categories spad">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-3">
+                <div class="categories__text">
+                    <h2>Men's Collection<br><span>Hot sale</span> </h2>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="categories__hot__deal">
+                    <img src="product_images/shirt1/denim jacket.jpg" alt="">
+                    <div class="hot__deal__sticker">
+                        <span>Sale Of</span>
+                        <h5>$30.99</h5>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 offset-lg-1">
+                <div class="categories__deal__countdown">
+                    <span>Deal Of The Week</span>
+                    <h2>Denim Jacket</h2>
+                    <!-- <div class="categories__deal__countdown__timer" id="countdown">
+                            <div class="cd-item">
+                                <span>3</span>
+                                <p>Days</p>
+                            </div>
+                            <div class="cd-item">
+                                <span>1</span>
+                                <p>Hours</p>
+                            </div>
+                            <div class="cd-item">
+                                <span>50</span>
+                                <p>Minutes</p>
+                            </div>
+                            <div class="cd-item">
+                                <span>18</span>
+                                <p>Seconds</p>
+                            </div>
+                        </div> -->
+                    <a href="#" class="primary-btn">Shop now</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Toast Container -->
+{% if messages %}
+<div class="toast-container position-fixed end-0 p-3 toast-adjust">
+    <div id="successToast" class="toast align-items-center custom-toast-bg custom-toast-size border-0 show" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="2000">
+        <div class="d-flex">
+            <div class="toast-body">
+                {% for message in messages %}
+                    {{ message }}
+                {% endfor %}
+            </div>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var toastElement = document.getElementById('successToast');
+        if (toastElement) {
+            var toast = new bootstrap.Toast(toastElement);
+            toast.show();
+            setTimeout(function() {
+                toast.hide();
+            }, 3000); // 2000 milliseconds = 2 seconds
+        }
+    });
+</script>
+{%endif%}
+<!-- Footer Section Begin -->
+ <!-- Bootstrap Toast -->
+
+{%endblock%}

@@ -1,0 +1,59 @@
+{% extends 'userbasetemplate.html' %}
+{% block content %}
+<div class="container mt-5 mb-5">
+    <div class="card orderproducttab">
+        <div class="card-header">
+            <strong>Order #{{order.id}}</strong>{% if order.payment_id %}<strong> <br>Payment Id: {{order.payment_id}}</strong>{%endif%}
+            <span class="float-end">Placed on {{ order.created_at|date:"d-m-Y" }}</span>
+        </div>
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <h5 class="card-title">Order Status : <span class="text-primary"> {{order.status}}</span></h5>
+                    <h5 class="card-title">Payment Method : {{order.payment_mode}} </h5>
+                    <h5 class="card-title">Total Price : {{order.total_price}} </h5>
+                </div>
+                <div class="col-md-6 text-end">
+                    <h5>Shipping Address:</h5>
+                    <p class="">
+                        {{order.address_name}}<br>
+                        {{order.address_house_no}} {{order.address_street}}<br>
+                        {{order.address_state}}, {{order.address_city}} {{order.address_pincode}}<br>
+                    </p>
+                </div>
+            </div>
+            <h5>Products:</h5>
+            <ul class="list-group mb-3 ">
+                {%for item in order_item%}
+                <li class="list-group-item d-flex justify-content-between align-items-center orderData">
+                    {%csrf_token%}
+                    <img src="{{item.product.primary_image.url}}" alt="Product 1" class="img-thumbnail" width="70" height="70">
+                    <div class="ms-3 me-auto">
+                        <input type="hidden" value="{{order.id}}" class="order_id">
+                        <input type="hidden" value="{{item.product.id}}" class="product_id">
+                        {{item.product.product_name}} (Quantity: {{item.quantity}}) <br>Size: {{item.size.size_code}}
+                        <div class="text-muted">Product Price : ₹{{item.product.get_discounted_price}}</div>
+                    </div>
+                    {%if item.status == 'Cancelled' %}
+                    <span class="text-danger">Cancelled</span>
+                    {% elif item.status == 'Out for Delivery' %}
+                    <span class="text-primary">Out For Delivery</span>
+                    {% elif item.status == 'Return Requested' %}
+                    <span class="text-primary">Requested For Return</span>
+                    {% elif item.status == 'Return Approved' %}
+                    <span class="text-primary">Return Approved</span>
+                    {% elif item.status == 'Returned' %}
+                    <span class="text-warning">Returned</span>
+                    {% elif item.status == 'Delivered' %}
+                    <span class="text-success">Delivered</span><br>
+                    <button class="btn btn-warning btn-sm returnproductbtn">Return Product</button>
+                    {%else%}
+                    <button class="btn btn-danger btn-sm cancelproductbtn">Cancel Product</button>
+                    {%endif%}
+                </li>
+                {%endfor%}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

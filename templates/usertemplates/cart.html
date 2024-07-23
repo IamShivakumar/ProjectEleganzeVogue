@@ -1,0 +1,195 @@
+{% extends 'userbasetemplate.html' %}
+{% block content %}
+<section class="breadcrumb-option">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="breadcrumb__text">
+                    <h4>Shopping Cart</h4>
+                    <div class="breadcrumb__links">
+                        <a href="{% url 'homepage' %}">Home</a>
+                        <a href="{% url 'shop'%}">Shop</a>
+                        <span>Shopping Cart</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Breadcrumb Section End -->
+
+<!-- Shopping Cart Section Begin -->
+<section class="shopping-cart spad">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="shopping__cart__table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th>Total</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {%for cart_item in cartdetails%}
+                            <tr class="productData">
+                                {%csrf_token%}
+                                <td class="product__cart__item">
+                                    <div class="product__cart__item__pic">
+                                        <img src="{{cart_item.product.primary_image.url}}" alt="">
+                                    </div>
+                                    <div class="product__cart__item__text">
+                                        <input type="hidden" value="{{cart_item.product.id}}" class="productid">
+                                        <h6>{{cart_item.product.product_name}}</h6>
+                                        <h5>₹{{cart_item.discounted_price}}</h5>
+                                        <h6>Size:&nbsp;{{cart_item.size.size_code}}</h6>
+                                    </div>
+                                </td>
+                                <td class="quantity__item">
+                                    <div class="quantity">
+                                        <div class="pro-qty-2">
+                                            <!-- <span class="fa fa-angle-left dec qtybtn"></span> -->
+                                            <input type="number" class="quantity-input" value="{{cart_item.quantity}}" max="{{cart_item.available_qty}}" data-unit-price="{{ cart_item.discounted_price }}">
+                                            <!-- <span class="fa fa-angle-right inc qtybtn"></span> -->
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="cart__price" data-unit-price="{{ cart_item.discounted_price }}">₹{{ cart_item.discounted_price }}</td>
+                                <td class="cart__close"><a href="{% url 'deletecartitem' cart_item.product.id %}"><i class="fa fa-close"></i></td>
+                            </tr>
+                            {%endfor%}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="row">
+                    <div class="col-lg-6 col-md-6 col-sm-6">
+                        <div class="continue__btn">
+                            <a href="{%url 'shop'%}">Continue Shopping</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="cart__total">
+                    <h6>Cart total</h6>
+                    <ul>
+                        <li>Subtotal<span>₹0</span></li>
+                        <li>Total <span>₹0</span></li>
+                    </ul>
+                    {% if cartdetails %}
+                    <a href="{% url 'checkout'%}" class="primary-btn">Proceed to checkout</a>
+                    {%endif%}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% if messages %}
+<div class="toast-container position-fixed end-0 p-3 toast-adjust">
+    <div id="successToast" class="toast align-items-center custom-toast-size border-0 show" style="background-color: red; color:white" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="2000" >
+        <div class="d-flex">
+            <div class="toast-body">
+                {% for message in messages %}
+                    {{ message }}
+                {% endfor %}
+            </div>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+{%endif%}
+
+{%endblock%}
+
+{%block script%}
+<!-- Include jQuery library -->
+ {{ block.super }}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const qtyBtns = document.querySelectorAll('.qtybtn');
+        const quantityInputs = document.querySelectorAll('.quantity-input');
+        qtyBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                let inputEl = btn.parentElement.querySelector('input.quantity-input');
+                let value = parseInt(inputEl.value);
+
+                if (btn.classList.contains('inc')) {
+                    value++;
+                } else if (btn.classList.contains('dec') && value > 1) {
+                    value--;
+                }
+                inputEl.value = value;
+
+                updateTotalPrice(inputEl);
+                updatecart(inputEl);
+            });
+        });
+        quantityInputs.forEach(input => {
+            input.addEventListener('change', function() {
+                if (this.value < 1) {
+                    this.value = 1;  // Ensure the quantity is at least 1
+                }
+                updateTotalPrice(this);
+                updatecart(this);
+            });
+        });
+        function updateTotalPrice(inputEl) {
+            let priceEl = inputEl.closest('tr').querySelector('.cart__price');
+            let unitPrice = parseFloat(inputEl.dataset.unitPrice);
+            let totalPrice = (inputEl.value * unitPrice).toFixed(2);
+            priceEl.textContent = `₹ ${totalPrice}`;
+            updateSubtotal();
+        }
+
+        function updateSubtotal() {
+            let subtotal = 0;
+
+            let cartRows = document.querySelectorAll('.shopping__cart__table tbody tr');
+            cartRows.forEach(row => {
+                let priceEl = row.querySelector('.cart__price');
+                let totalPrice = parseFloat(priceEl.textContent.replace('₹', '').trim());
+                subtotal += totalPrice;
+            });
+
+            let subtotalEl = document.querySelector('.cart__total ul li:first-child span');
+            let totalEl = document.querySelector('.cart__total ul li:last-child span');
+
+            subtotalEl.textContent = `₹ ${subtotal.toFixed(2)}`;
+            totalEl.textContent = `₹ ${subtotal.toFixed(2)}`;
+        }
+        function updatecart(inputEl){
+            let product_id=$(inputEl).closest('.productData').find('.productid').val();
+            let quanity=$(inputEl).closest('.productData').find('.quantity-input').val();
+            let token=$('input[name=csrfmiddlewaretoken]').val();
+
+            $.ajax({
+                method: "POST",
+                url: "/update-cart",
+                data: {
+                    'product_id':product_id,
+                    'quantity':quanity,
+                    csrfmiddlewaretoken:token
+                },
+                success: function (response) {
+                    console.log(response.status)
+                }
+            });
+        }
+        updateSubtotal();
+
+        var toastElement = document.getElementById('successToast');
+        if (toastElement) {
+            var toast = new bootstrap.Toast(toastElement);
+            toast.show();
+            setTimeout(function() {
+                toast.hide();
+            }, 3000); 
+        }
+    });
+</script>
+{%endblock%}

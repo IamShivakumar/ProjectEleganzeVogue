@@ -1,0 +1,71 @@
+{% load static%}
+{% load socialaccount%}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+   <!--=============== REMIXICONS ===============-->
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/3.5.0/remixicon.css" crossorigin="">
+   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+   <!--=============== CSS ===============-->
+   <link rel="stylesheet" href="{% static 'css/authenticationstyles.css' %}">
+
+   <title>Login form</title>
+</head>
+
+<body>
+   <div>
+      <h1 class="appname">Eleganza vogue</h1><br>
+   </div>
+   <div class="login">
+      <!-- <img src="assets/img/background.png" alt="image" class="login__bg"> -->
+
+      <form action="{% url 'userlogin'%}" class="login__form" method="POST">
+         {% csrf_token %}
+         <h1 class="login__title">User Login</h1>
+
+         <div class="login__inputs">
+            <div class="login__box">
+               <input type="text" placeholder="Username" name="username"  class="login__input">
+               <i class="ri-mail-fill"></i>
+            </div>
+
+            <div class="login__box">
+               <input type="password" placeholder="Password" name="password"  class="login__input">
+               <i class="ri-lock-2-fill"></i>
+               <span class="error-message">{{errors.empty}}</span>
+               <span class="error-message">{{errors.invalid}}</span>
+            </div>
+         </div>
+
+         <div class="login__check">
+            <div class="login__check-box">
+               <input type="checkbox" class="login__check-input" id="user-check">
+               <label for="user-check" class="login__check-label">Remember me</label>
+            </div>
+
+            <a href="{%url 'emailverification' %}" class="login__forgot">Forgot Password?</a>
+         </div>
+
+         <button type="submit" class="btn btn-primary rounded-pill login__button">Login</button>
+         <div class="login__or">
+            <span>or</span>
+         </div>
+
+         <a href="{% provider_login_url 'google' %}" class="btn btn-dark login__button login__button--google">
+            <i class="ri-google-fill"></i> Sign-in with Google
+         </a>
+
+         <div class="login__register">
+            Don't have an account? <a href="{% url 'usersignup'%}">Register</a>
+         </div>
+      </form>
+   </div>
+</body>
+
+</html>

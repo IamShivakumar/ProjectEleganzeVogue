@@ -1,0 +1,198 @@
+{% extends 'userbasetemplate.html' %}
+{% block content %}
+<div class="product__details__content">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="product__details__tab">
+                    <ul class="nav nav-tabs" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" data-bs-toggle="tab" href="#tabs-5" role="tab">Profile</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#tabs-6" role="tab">Address Management</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#tabs-7" role="tab">Order Details</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content justify-content-center">
+                        <div class="tab-pane active userData" id="tabs-5" role="tabpanel">
+                            <div class="product__details__tab__content">
+                                <table class="table table-bordered table-hover">
+                                    <tbody>
+                                        <tr>
+                                            <th scope="row">Username</th>
+                                            <td>{{ user.username }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">Email</th>
+                                            <td>{{ user.email }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">First Name</th>
+                                            <td>{{ user.first_name }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">Last Name</th>
+                                            <td>{{ user.last_name }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">Phone</th>
+                                            <td>{{ user.phone_number }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <div class="text-center mt-4">
+                                    <button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#editProfileModal">Edit Profile</button>
+                                    <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#changePasswordModal">Change Password</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="tabs-6" role="tabpanel">
+                            <div class="product__details__tab__content">
+                                <div class="row">
+                                    {% for address in address %}
+                                    <div class="col-md-4 addressData">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <input type="hidden" value="{{ address.id }}" class="addressid">
+                                                <h5 class="card-title">Address</h5>
+                                                <p class="card-text">{{ address.house_no }}, {{ address.street }},<br>{{ address.landmark }}, {{ address.city }}:{{ address.pincode }}</p>
+                                                {% if address.is_primary %}
+                                                <p class="text-success">Default</p>
+                                                {% endif %}
+                                                <button class="btn btn-danger btn-sm removeAddressbtn">Remove</button>
+                                                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editAddressModal{{ forloop.counter }}">Edit</button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Edit Address Modal for this address -->
+                                    <div class="modal fade" id="editAddressModal{{ forloop.counter }}" tabindex="-1" aria-labelledby="editAddressModalLabel{{ forloop.counter }}" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="editAddressModalLabel{{ forloop.counter }}">Edit Address</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form id="editAddressForm{{ forloop.counter }}" action="{% url 'editaddress' %}">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="address_id" value="{{ address.id }}">
+                                                        <div class="mb-3">
+                                                            <label for="edit_house_no{{ forloop.counter }}" class="form-label">House No</label>
+                                                            <input type="text" class="form-control" id="edit_house_no{{ forloop.counter }}" name="house_no" value="{{ address.house_no }}">
+                                                            <div class="invalid-feedback" id="edit_house_no_error{{ forloop.counter }}"></div>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="edit_street{{ forloop.counter }}" class="form-label">Street</label>
+                                                            <input type="text" class="form-control" id="edit_street{{ forloop.counter }}" name="street" value="{{ address.street }}">
+                                                            <div class="invalid-feedback" id="edit_street_error{{ forloop.counter }}"></div>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="edit_city{{ forloop.counter }}" class="form-label">City</label>
+                                                            <input type="text" class="form-control" id="edit_city{{ forloop.counter }}" name="city" value="{{ address.city }}">
+                                                            <div class="invalid-feedback" id="edit_city_error{{ forloop.counter }}"></div>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="edit_state{{ forloop.counter }}" class="form-label">State</label>
+                                                            <input type="text" class="form-control" id="edit_state{{ forloop.counter }}" name="state" value="{{ address.state }}">
+                                                            <div class="invalid-feedback" id="edit_state_error{{ forloop.counter }}"></div>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="edit_country{{ forloop.counter }}" class="form-label">Country</label>
+                                                            <input type="text" class="form-control" id="edit_country{{ forloop.counter }}" name="country" value="{{ address.country }}">
+                                                            <div class="invalid-feedback" id="edit_country_error{{ forloop.counter }}"></div>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="edit_pincode{{ forloop.counter }}" class="form-label">Pincode</label>
+                                                            <input type="number" class="form-control" id="edit_pincode{{ forloop.counter }}" min="111111" name="pincode" value="{{ address.pincode }}">
+                                                            <div class="invalid-feedback" id="edit_pincode_error{{ forloop.counter }}"></div>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="radio" name="primary_address" id="edit_primary_yes{{ forloop.counter }}" value="True" {% if address.is_primary %}checked{% endif %}>
+                                                            <label class="form-check-label" for="edit_primary_yes{{ forloop.counter }}">
+                                                                Make this my primary address
+                                                            </label>
+                                                        </div>
+                                                        <button type="submit" class="btn btn-primary mt-3">Save changes</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="text-center mt-4">
+                                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAddressModal">Add New Address</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="tabs-7" role="tabpanel">
+                            <div class="product__details__tab__content">
+                                <!-- Order details content goes here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Address Modal -->
+<div class="modal fade" id="addAddressModal" tabindex="-1" aria-labelledby="addAddressModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addAddressModalLabel">Add New Address</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addAddressForm" action="{% url 'addaddress' %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="house_no" class="form-label">House No</label>
+                        <input type="text" class="form-control" id="house_no" name="house_no">
+                        <div class="invalid-feedback" id="house_no_error"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="street" class="form-label">Street</label>
+                        <input type="text" class="form-control" id="street" name="street">
+                        <div class="invalid-feedback" id="street_error"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="city" class="form-label">City</label>
+                        <input type="text" class="form-control" id="city" name="city">
+                        <div class="invalid-feedback" id="city_error"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="state" class="form-label">State</label>
+                        <input type="text" class="form-control" id="state" name="state">
+                        <div class="invalid-feedback" id="state_error"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="country" class="form-label">Country</label>
+                        <input type="text" class="form-control" id="country" name="country">
+                        <div class="invalid-feedback" id="country_error"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="pincode" class="form-label">Pincode</label>
+                        <input type="number" class="form-control" id="pincode" min="111111" name="pincode">
+                        <div class="invalid-feedback" id="pincode_error"></div>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="primary_address" id="primary_yes" value="True">
+                        <label class="form-check-label" for="primary_yes">
+                            Make this my primary address
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-primary mt-3 addAddressbtn">Add Address</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
