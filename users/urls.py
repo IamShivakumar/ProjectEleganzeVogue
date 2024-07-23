@@ -20,7 +20,7 @@ urlpatterns = [
 
     path('addaddress/',addaddress,name='addaddress'),
     path('delete-address',deleteAddress,name="deleteaddresss"),
-    path('change-password/',changePassword,name='changepassword'),
+    path('changepassword/',changePassword,name='changepassword'),
 
     path('add-to-wishlist',addtowishlist,name='addwishlist'),
     path('delete-wishlist',deletewishlist,name='deletewishlist'),

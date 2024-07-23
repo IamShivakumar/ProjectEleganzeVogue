@@ -78,22 +78,24 @@
                             <div class="checkout__order__products">Product <span>Total</span></div>
                             {% for item in cart_items %}
                             <ul class="checkout__total__products">
-                                <li>01. {{item.product.product_name}} X {{item.quantity}} <span>$ {{item.item_total_price}}</span></li>
+                                <li>01. {{item.product.product_name}} X {{item.quantity}} <span>₹ {{item.item_total_price}}</span></li>
                             </ul>
                             {% endfor %}
                             <ul class="checkout__total__all"> 
-                                <li>Subtotal <span>${{totalprice}}</span></li>
+                                <li>Subtotal <span>₹{{totalprice}}</span></li>
                                 <li>Coupon Discount <span id="discount">-0%</span></li>
-                                <li>Total <span id="total">${{totalprice}}</span></li>
+                                <li>Total <span id="total">₹{{totalprice}}</span></li>
                                 <input type="hidden" id="total_price" value="{{totalprice}}" name="total_price">
                             </ul>
                             <p class="text-danger">Select from Below Payment Method*</p>
                             <div class="checkout__input__checkbox">
+                                {%if totalprice < 1000 %}
                                 <label for="cash-on-delivery">
                                     Cash On delivery
                                     <input type="radio" id="cash-on-delivery" name="payment_method" value="Cash On Delivery" >
                                     <span class="checkmark"></span>
                                 </label>
+                                {%endif%}
                                 <label for="Wallet">
                                     Wallet
                                     <input type="radio" id="Wallet" name="payment_method" value="Wallet">
@@ -182,9 +184,6 @@
 <input type="hidden" value="{{user.phone_number}}" name="phone">
 <input type="hidden" value="{{user.first_name}}" name="first_name">
 <input type="hidden" value="{{user.last_name}}" name="last_name">
-
-
-
 <input type="hidden" id="apply-coupon-url" data-url="{% url 'applycoupon' %}">
 <input type="hidden" id="totalprice-data" data-totalprice="{{ totalprice }}">
 {% endblock %}

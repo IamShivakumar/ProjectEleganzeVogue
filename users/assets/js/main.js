@@ -257,9 +257,9 @@
 
     $('.changepasswordbtn').click(function (e) {
         e.preventDefault();
+        console.log($('#changePasswordForm').attr('action'))
         $('.error-message').text('');
         $('.form-control').removeClass('is-invalid');
-
         $.ajax({
             type: 'POST',
             url: $('#changePasswordForm').attr('action'), // URL for the form action
@@ -272,7 +272,7 @@
             success: function (response) {
                 Swal.fire({
                     title: 'Password Change',
-                    text: 'Password updated successfully!',
+                    text: response.message,
                     icon: 'success',
                     timer: 1000,
                     showConfirmButton: false,

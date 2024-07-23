@@ -296,16 +296,17 @@ def changePassword(request):
         if new_password1 != confirmpassword:
             errors['new_password2'] = "Passwords did not match!"
 
-        if not errors and request.user.check_password(oldpassword):
-                request.user.set_password(new_password1)
-                request.user.save()
-                update_session_auth_hash(request,request.user)
-        else:
-            if not request.user.check_password(oldpassword):
-                errors['old_password'] = "Incorrect old password"
-        
         if errors:
-            return JsonResponse({'errors':errors},status=400)
+            return JsonResponse({'errors': errors}, status=400)
+        
+        if not request.user.check_password(oldpassword):
+            errors['old_password'] = "Incorrect old password"
+            return JsonResponse({'errors': errors}, status=400)
+
+        request.user.set_password(new_password1)
+        request.user.save()
+        update_session_auth_hash(request, request.user)
+        return JsonResponse({'message': 'Password updated successfully'}, status=200)
     return redirect('homepage')
 
 @login_required

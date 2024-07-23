@@ -207,7 +207,7 @@ def emailauth(request):
                 return render(request, "emailverification.html", {"errors": errors})
 
 
-def changepassword(request):
+def forgotpassword(request):
     if request.method == "POST":
         if not request.session.get("user_email"):
             return redirect("emailverification")

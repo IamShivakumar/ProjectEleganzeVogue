@@ -197,8 +197,8 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="changePasswordForm" action="{% url 'changepassword'%}">
-                    {% csrf_token %}
+                <form id="changePasswordForm" method="post" action="{% url 'changepassword' %}">
+                    {% csrf_token %} 
                     <div class="mb-3">
                         <label for="old_password" class="form-label">Old Password</label>
                         <input type="password" class="form-control" id="old_password" name="old_password">

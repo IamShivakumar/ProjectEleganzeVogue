@@ -313,8 +313,7 @@ def update_sku(request):
                 stock.save()
                 return redirect('productlisting')
         except product_sku.DoesNotExist:
-            if quantity>0:
-                product_sku.objects.create(product_id=product_id,size_id=size_id,quantity=quantity)
+            product_sku.objects.create(product_id=product_id,size_id=size_id,quantity=quantity)
             return redirect('productlisting')
         
 
