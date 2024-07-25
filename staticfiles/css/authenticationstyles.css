@@ -155,27 +155,12 @@ body {
 .login__box i {
   font-size: 1.25rem;
 }
-.otp__input {
-  display: flex;
-  justify-content: space-between;
-  gap: 0.5rem;
-}
 
-.otp__digit {
-  width: 40px;
-  height: 40px;
-  text-align: center;
-  border: 2px solid hsla(0, 0%, 100%, .7);
-  border-radius: 0.5rem;
-  background: none;
-  color: var(--white-color);
-  font-size: 1.5rem;
-}
-
-.otp__resend {
-  text-align: center;
-  margin-top: 1rem;
-  color: var(--white-color);
+.toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1050; 
 }
 
 .login__check,

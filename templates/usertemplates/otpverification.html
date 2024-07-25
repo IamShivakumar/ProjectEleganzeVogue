@@ -8,47 +8,84 @@
 
     <!--=============== REMIXICONS ===============-->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/3.5.0/remixicon.css" crossorigin="">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 
     <!--=============== CSS ===============-->
     <link rel="stylesheet" href="{% static 'css/authenticationstyles.css' %}">
 
-    <title>Sign-up</title>
+    <title>Email Verification</title>
 </head>
 
 <body>
     <div class="login">
         <!-- <img src="assets/img/background.png" alt="image" class="login__bg"> -->
 
-        <form action="" class="signup__form">
-            <h1 class="login__title">OTP Verification</h1>
+        <form action="{% url 'verify_otp' email=email %}" method="POST" class="signup__form">
+            {% csrf_token %}
+            <h1 class="login__title">Email Verification</h1>
             <div class="login__inputs">
                 <div class="login__box">
-                    <input type="email" id="email" placeholder="Email ID" required class="login__input">
+                    <input type="email" id="email" value={{email}} disabled class="login__input">
                     <i class="ri-mail-fill"></i>
                 </div>
-                <div class="login__row" id="otpSection" style="display: none;">
-                    <div class="otp__input">
-                        <input type="text" class="otp__digit" maxlength="1" disabled>
-                        <input type="text" class="otp__digit" maxlength="1" disabled>
-                        <input type="text" class="otp__digit" maxlength="1" disabled>
-                        <input type="text" class="otp__digit" maxlength="1" disabled>
-                        <input type="text" class="otp__digit" maxlength="1" disabled>
-                        <input type="text" class="otp__digit" maxlength="1" disabled>
-                    </div>
-                    <div class="otp__resend">
-                        <span id="resendOtp"><a href="#" id="resendLink">Resend OTP</a> in <span id="timer">60</span>s</span>
-                    </div>
-                </div>
-                <div class="login__row">
-                    <button type="button" id="sendOtp" class=" btn btn-primary rounded-pill login__button login__button--send">Send OTP</button>
+                <div class="login__box">
+                    <input type="text" name="otp" placeholder="OTP" class="login__input" maxlength="6">
                 </div>
                 
             </div>
+            <div class="login__check">
+                <span id="resendOtp"><a href="{% url 'resend_otp' email=email %}" id="resendLink" class="disabled">Resend OTP</a> in <span
+                    id="timer">60</span>s</span>
+             </div>
+             <button type="submit" 
+                        class=" btn btn-primary rounded-pill login__button login__button--send">Verify OTP</button>
         </form>
     </div>
+    {% if messages %}
+<div class="toast-container position-fixed end-0 p-3 toast-adjust">
+    <div id="successToast" class="toast align-items-center custom-toast-size border-0 show" style="background-color: red; color:white" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="2000" >
+        <div class="d-flex">
+            <div class="toast-body">
+                {% for message in messages %}
+                    {{ message }}
+                {% endfor %}
+            </div>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz4fnFO9T83c/8FF9DfcBF2tvk02M+zJ6/7E1xT+jpN2uH0G70E9lE4D7" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-GLhlTQ8Q7bI7ZlFbtI5ko69OnCTeZ6z4E2VWy76U6Lq8P2G+F8m7p6kP6w8gXn1" crossorigin="anonymous"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var toastElement = document.getElementById('successToast');
+        if (toastElement) {
+            var toast = new bootstrap.Toast(toastElement);
+            toast.show();
+            setTimeout(function() {
+                toast.hide();
+            }, 2000); // 2000 milliseconds = 2 seconds
+        }
+    });
+</script>
+{%endif%}
+    <script>
+        let timerElement = document.getElementById('timer');
+        let resendLink = document.getElementById('resendLink');
+        let timeLeft = 60;
 
-    <script src="{% static 'js/authentication.js' %}"></script>
+        function updateTimer() {
+            if (timeLeft > 0) {
+                timeLeft--;
+                timerElement.textContent = timeLeft;
+            } else {
+                resendLink.classList.remove('disabled');
+            }
+        }
+
+        setInterval(updateTimer, 1000);
+    </script>
 </body>
 
 </html>

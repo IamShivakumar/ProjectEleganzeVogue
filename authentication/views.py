@@ -1,6 +1,5 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import View
 from users.models import CustomUser
 from adminside.models import Order, Order_items
@@ -10,24 +9,24 @@ from django.contrib.auth.decorators import login_required
 from django.views.generic import TemplateView
 from django.views.decorators.cache import cache_control
 from django.utils.decorators import method_decorator
-import re
-import json
+import re,random,json
+from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Sum
 from django.shortcuts import redirect
-from allauth.socialaccount.models import SocialApp
+from django.core.mail import send_mail
+from django.http import JsonResponse
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 
 # Create your views here.
 
-
+@method_decorator(cache_control(no_cache=True, must_revalidate=True, no_store=True), name="dispatch")
 class usersignupView(View):
     template_name = "signup.html"
 
     def post(self, request):
-        print(request.POST)
-        if request.user.is_authenticated:
-            redirect("homepage")
+        if request.user.is_authenticated and request.user.is_active:
+           return redirect("homepage")
         firstname = request.POST.get("firstname")
         lastname = request.POST.get("lastname")
         username = request.POST.get("username")
@@ -59,37 +58,96 @@ class usersignupView(View):
             errors["password"] = "Please enter a password"
         if errors:
             return render(request, self.template_name, {"errors": errors})
-
-        # User Creation
-        user = CustomUser.objects.create_user(
-            first_name=firstname,
-            last_name=lastname,
-            username=username,
-            email=email,
-            phone_number=phone_number,
-            password=password,
-        )
-        user.save()
-        print("user is saved")
-        messages.success(
-            request,
-            f"User '{username}' has been created successfully! You can now login.",
-        )
-        return redirect("userlogin")
+        
+        #OTP Generation
+        otp=random.randint(100000,999999)
+        request.session['registration_data']={
+            'first_name':firstname,
+            'last_name':lastname,
+            'username':username,
+            'email':email,
+            'phone_number':phone_number,
+            'password':password,
+            'otp':otp
+        }
+        send_mail(
+            "Email Verification",
+            f'Your OTP is {otp}',
+            "Eleganza Vogue Official <shivakumarchn11@gmail.com>",
+            [email],
+            fail_silently=False,
+            )
+        return redirect('verify_otp', email=email)
 
     def get(self, request):
-        if request.user.is_authenticated:
-            redirect("homepage")
+        if request.user.is_authenticated and request.user.is_active:
+            return redirect("homepage")
         return render(request, self.template_name)
 
     def is_valid_email(self, email):
         pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
         return re.match(pattern, email) is not None
+    
+@method_decorator(cache_control(no_cache=True, must_revalidate=True, no_store=True), name="dispatch")
+class verifyOTPView(View):
+    template_name="otpverification.html"
+    def get(self, request, email):
+        if request.user.is_authenticated and request.user.is_active:
+            return redirect("homepage")
+        return render(request, self.template_name, {'email': email})
 
+    def post(self, request, email):
+        otp = request.POST.get('otp')
+        stored_data = request.session.get('registration_data')
 
-@method_decorator(
-    cache_control(no_cache=True, must_revalidate=True, no_store=True), name="dispatch"
-)
+        if stored_data and str(stored_data.get('otp')) == otp:
+            user = CustomUser.objects.create_user(
+                first_name=stored_data['first_name'],
+                last_name=stored_data['last_name'],
+                username=stored_data['username'],
+                email=stored_data['email'],
+                phone_number=stored_data['phone_number'],
+                password=stored_data['password'],
+            )
+            user.save()
+            del request.session['registration_data']
+            user = authenticate(request, username=stored_data['username'], password=stored_data['password'])
+            if user is not None:
+                login(request, user)
+                messages.success(request, f"User '{stored_data['username']}' has been created and logged in successfully!")
+                return redirect("homepage")
+            else:
+                messages.error(request, 'Error logging in. Please try to log in manually.')
+                return redirect("userlogin")
+        else:
+            messages.error(request, 'Invalid OTP. Please try again.')
+            return render(request, self.template_name, {'email': email})
+        
+@csrf_exempt
+def resend_otp(request, email):
+    if request.method == "GET":
+        stored_data = request.session.get('registration_data')
+
+        if stored_data and stored_data['email'] == email:
+            otp = random.randint(100000, 999999)
+            stored_data['otp'] = otp
+            request.session['registration_data'] = stored_data
+
+            # Send OTP via Email
+            send_mail(
+                'OTP for Email Verification',
+                f'Your new OTP is {otp}',
+                'Eleganza Vogue <shivakumarchn11@gmail.com>',
+                [email],
+                fail_silently=False,
+            )
+            messages.success(request,'OTP Resent successfully')
+            return render(request,'otpverification.html', {'email': email})
+        else:
+            messages.error(request, 'Invalid Email')
+            return redirect('usersignup')
+
+@method_decorator(cache_control(no_cache=True, must_revalidate=True, no_store=True), name="dispatch")
 class UserLoginView(View):
     template_name = "login.html"
 
