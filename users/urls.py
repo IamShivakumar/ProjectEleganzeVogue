@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path,include
-from .views import shoppageview,product_detail,cartdetail,addtocart,userdetails,deletecartitem,addtowishlist,checkout,updatecart,wishlistview,deletewishlist,addaddress,edituser,changePassword,deleteAddress,placeorder,orderDetail,cancelproduct,cancelOrder,applyCoupon,returnproduct
+from .views import shoppageview,product_detail,cartdetail,addtocart,userdetails,deletecartitem,addtowishlist,checkout,updatecart,wishlistview,deletewishlist,addaddress,edituser,changePassword,deleteAddress,placeorder,orderDetail,cancelproduct,cancelOrder,applyCoupon,returnproduct,generate_referral_code,download_invoice
 
 
 urlpatterns = [
@@ -32,7 +32,7 @@ urlpatterns = [
 
     path('cancel-order',cancelOrder,name='cancelorder'),
 
-    path('apply-coupon/',applyCoupon,name='applycoupon')
-
-
+    path('apply-coupon/',applyCoupon,name='applycoupon'),
+    path('generate_referral_code/',generate_referral_code,name='generate_referral_code'),
+    path('download_invoice/<int:order_id>',download_invoice,name='download_invoice')
     ]

@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path,include
-from .  views import adminlogin,categorylisting,addCategory,editcategory,blockcategory,productlisting,addproducts,signout,userlisting,blockuser,editproduct,blockproduct,orderlisting,change_order_status,couponlisting,approve_return,get_quantity,update_sku,generate_pdf
+from .  views import adminlogin,categorylisting,addCategory,editcategory,blockcategory,productlisting,addproducts,signout,userlisting,blockuser,editproduct,blockproduct,orderlisting,change_order_status,couponlisting,approve_return,get_quantity,update_sku,generate_pdf,delete_coupon
 
 
 urlpatterns = [
@@ -28,5 +28,6 @@ urlpatterns = [
     path('change-status/<int:order_id>',change_order_status,name='change_order_status'),
     path('approve-return/',approve_return,name='approveReturn'),
     path('coupons/',couponlisting,name='couponlisting'),
+    path('delete_coupon/<int:coupon_id>',delete_coupon,name='delete_coupon'),
     path('generate_pdf/',generate_pdf,name='generate_pdf')
 ]

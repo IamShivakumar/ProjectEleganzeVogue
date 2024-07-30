@@ -31,10 +31,7 @@
 </head>
 
 <body>
-    <!-- Page Preloder -->
-    <!-- <div id="preloder">
-        <div class="loader"></div>
-    </div> -->
+
 
     <!-- Offcanvas Menu Begin -->
     <div class="offcanvas-menu-overlay"></div>
@@ -42,7 +39,6 @@
         <div class="offcanvas__option">
             <div class="offcanvas__links">
                 <a href="{% url 'userlogin'%}">Sign in</a>
-                <a href="#">FAQs</a>
             </div>
 
         </div>
@@ -177,9 +173,10 @@
 
     <!-- Js Plugins -->
     <!-- <script src="js/jquery-3.3.1.min.js"></script> -->
-    {%block script%}
+    
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"
         integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+
     <!-- Include jQuery Countdown Plugin -->
     <script src="https://cdn.rawgit.com/hilios/jQuery.countdown/2.2.0/dist/jquery.countdown.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.6/umd/popper.min.js"
@@ -195,6 +192,7 @@
         crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
     <script src="{% static 'js/main.js'%}"></script>
+    {%block script%}
     {%endblock%}
 </body>
 

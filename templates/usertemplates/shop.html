@@ -9,7 +9,7 @@
                 <div class="breadcrumb__text">
                     <h4>Shop</h4>
                     <div class="breadcrumb__links">
-                        <a href="#">Home</a>
+                        <a href="{%url 'homepage'%}">Home</a>
                         <span>Shop</span>
                     </div>
                 </div>
@@ -26,94 +26,110 @@
             <div class="col-lg-3">
                 <div class="shop__sidebar">
                     <div class="shop__sidebar__search">
-                        <form action="#">
-                            <input type="text" placeholder="Search...">
-                            <button type="submit"><span class="icon_search"></span></button>
+                        <form action="{% url 'shop'%}" method="GET">
+                            <input type="text" name="q" placeholder="Search..." value="{{search_query}}">
+                            <button type="submit"><span class="bi bi-search"></span></button>
                         </form>
                     </div>
-                    <div class="shop__sidebar__accordion">
+                    <form action="{% url 'shop'%}" method="GET" id="filter-form">
                         <div class="accordion" id="accordionExample">
-                            <div class="card">
-                                <div class="card-heading">
-                                    <a data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true"
-                                        aria-controls="collapseOne">Categories</a>
-                                </div>
-                                <div id="collapseOne" class="collapse show" data-parent="#accordionExample">
-                                    <div class="card-body">
-                                        <div class="shop__sidebar__categories">
-                                            <ul class="nice-scroll">
-                                                {% for category in categories %}
-                                                <li><a href="{%url 'shop'%}?category_id={{category.id}}" class="category-filter">{{ category.category_name }}</a></li>
-                                                {% endfor %}
-                                            </ul>
+                            <!-- Categories Filter -->
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="headingOne">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                                        Categories
+                                    </button>
+                                </h2>
+                                <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne">
+                                    <div class="accordion-body">
+                                        <div class="form-check">
+                                            {% for category in categories %}
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="categories"
+                                                    value="{{ category.id }}" id="category-{{ category.id }}" {% if category.id in selected_categories %}checked{% endif %}>
+                                                <label class="form-check-label" for="category-{{ category.id }}">
+                                                    {{ category.category_name }}
+                                                </label>
+                                            </div>
+                                            {% endfor %}
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="card">
-                                <div class="card-heading">
-                                    <a data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="true"
-                                        aria-controls="collapseThree">Pricing</a>
-                                </div>
-                                <div id="collapseThree" class="collapse show" data-parent="#accordionExample">
-                                    <div class="card-body">
-                                        <div class="shop__sidebar__price">
-                                            <ul>
-                                                <li><a href="#">Low to High</a></li>
-                                                <li><a href="#">High to Low</a></li>
-                                            </ul>
+
+                            <!-- Pricing Filter -->
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="headingThree">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#collapseThree" aria-expanded="false"
+                                        aria-controls="collapseThree">
+                                        Pricing
+                                    </button>
+                                </h2>
+                                <div id="collapseThree" class="accordion-collapse collapse"
+                                    aria-labelledby="headingThree">
+                                    <div class="accordion-body">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="price"
+                                                value="low-to-high" id="price-low-to-high" {% if selected_price_order == 'low-to-high' %}checked{% endif %}>
+                                            <label class="form-check-label" for="price-low-to-high">
+                                                Low to High
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="price"
+                                                value="high-to-low" id="price-high-to-low" {% if selected_price_order == 'high-to-low' %}checked{% endif %}>
+                                            <label class="form-check-label" for="price-high-to-low">
+                                                High to Low
+                                            </label>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="card">
-                                <div class="card-heading">
-                                    <a data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="true"
-                                        aria-controls="collapseFour">Size</a>
-                                </div>
-                                <div id="collapseFour" class="collapse show" data-parent="#accordionExample">
-                                    <div class="card-body">
-                                        <div class="shop__sidebar__tags">
-                                            {% for size in sizes%}
-                                            <a href="#">{{size.size_code}}</a>
-                                            {%endfor%}
+
+                            <!-- Size Filter -->
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="headingFour">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#collapseFour" aria-expanded="false"
+                                        aria-controls="collapseFour">
+                                        Size
+                                    </button>
+                                </h2>
+                                <div id="collapseFour" class="accordion-collapse collapse"
+                                    aria-labelledby="headingFour">
+                                    <div class="accordion-body">
+                                        <div class="form-check">
+                                            {% for size in sizes %}
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="sizes"
+                                                    value="{{ size.id }}" id="size-{{ size.id }}" {%if size.id in selected_sizes %} checked {%endif%} >
+                                                <label class="form-check-label" for="size-{{ size.id }}" >
+                                                    {{ size.size_code }}
+                                                </label>
+                                            </div>
+                                            {% endfor %}
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                        <button type="submit" class="btn btn-primary mt-3 w-100">Filter</button>         
+                    </form>
                 </div>
             </div>
             <div class="col-lg-9">
-                <!-- <div class="shop__product__option">
-                    <div class="row">
-                        <div class="col-lg-6 col-md-6 col-sm-6">
-                            <div class="shop__product__option__left">
-                                <p>Showing 1–12 of 126 results</p>
-                            </div>
-                        </div>
-                        <div class="col-lg-6 col-md-6 col-sm-6">
-                            <div class="shop__product__option__right">
-                                <p>Sort by Price:</p>
-                                <select>
-                                    <option value="">Low To High</option>
-                                    <option value="">₹0 - ₹55</option>
-                                    <option value="">₹55 - ₹100</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                </div> -->
                 <div class="row">
                     {% for prod in products %}
                     <div class="col-lg-4 col-md-6 col-sm-6 productData">
                         {%csrf_token%}
                         <div class="product__item">
                             <a href="{%url 'productdetail' prod.product.id%}">
-                                <div class="product__item__pic set-bg" data-setbg="{{ prod.product.primary_image.url }}">
+                                <div class="product__item__pic set-bg"
+                                    data-setbg="{{ prod.product.primary_image.url }}">
                                     {% if prod.out_of_stock %}
-                                    <span class="label text-danger" >Out of Stock</span>
+                                    <span class="label text-danger">Out of Stock</span>
                                     {%endif%}
                                 </div>
                             </a>
@@ -121,7 +137,8 @@
                                 <input type="hidden" value="{{prod.product.id}}" class="productid">
 
                                 <h6>{{ prod.product.product_name }}</h6>
-                                <button type="button" class="add-cart btn btn-danger btn-sm addtowishlistbtn">Add To wishlist <i class="bi bi-heart-fill"></i></button>
+                                <button type="button" class="add-cart btn btn-danger btn-sm addtowishlistbtn">Add To
+                                    wishlist <i class="bi bi-heart-fill"></i></button>
                                 <div class="rating">
                                     <i class="bi bi-star-fill"></i>
                                     <i class="bi bi-star-fill"></i>
@@ -129,7 +146,9 @@
                                     <i class="bi bi-star-fill"></i>
                                     <i class="bi bi-star"></i>
                                 </div>
-                                <h5>₹{{ prod.product.get_discounted_price }}</h5><span><p>{% if prod.product.discount %}({{prod.product.discount}}%off){%endif%}</p></span>
+                                <h5>₹{{ prod.product.get_discounted_price }}</h5><span>
+                                    <p>{% if prod.product.discount %}({{prod.product.discount}}%off){%endif%}</p>
+                                </span>
                             </div>
                         </div>
 
@@ -140,6 +159,7 @@
         </div>
     </div>
 </section>
+
 <!-- Shop Section End -->
 
 <!-- Include necessary JS libraries -->

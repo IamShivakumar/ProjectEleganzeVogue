@@ -44,6 +44,21 @@
                                             <th scope="row">Phone</th>
                                             <td>{{ user.phone_number }}</td>
                                         </tr>
+                                        <tr>
+                                            <th scope="row">Referral Code</th>
+                                            {%if user.referral_code %}
+                                            <td>
+                                                <span id="referral-code">{{user.referral_code}}</span>
+                                                <button class="btn btn-outline-secondary btn-sm" id="copy-button" data-clipboard-target="#referral-code">
+                                                    <i class="bi bi-clipboard"></i> Copy
+                                                </button>
+                                            </td>
+                                            {%else%}
+                                            <td>
+                                                <button class="btn btn-success btn-sm" id="generate-referral-code">Generate Referral Code</button>
+                                            </td>
+                                            {%endif%}
+                                        </tr>
                                     </tbody>
                                 </table>
                                 <div class="text-center mt-4">
@@ -114,6 +129,8 @@
                                                         class="btn btn-primary btn-md mb-2">View Order Details</a>
                                                     {%if order.status != 'Cancelled' and order.status != 'Delivered' and order.status != 'Out for Delivery' and order.status != 'Return Requested' and order.status != 'Returned' and order.status != 'Return Approved'%}
                                                     <button class="btn btn-danger btn-md mb-2 ordercancelbtn">Cancel Order</button>
+                                                    {%elif order.status == 'Delivered'%}
+                                                    <a href="{% url 'download_invoice' order.id %}" class="btn btn-success btn-md mb-2">Invoice Download</a>
                                                     {%endif%}
                                                 </div>
                                             </div>
@@ -333,3 +350,20 @@
 </div>
 
 {% endblock %}
+
+{%block script%}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.11/clipboard.min.js"></script>
+
+<script>
+    // Initialize Clipboard.js
+    var clipboard = new ClipboardJS('#copy-button');
+
+    clipboard.on('success', function(e) {
+        e.clearSelection();
+    });
+
+    clipboard.on('error', function(e) {
+        alert('Failed to copy referral code.');
+    });
+</script>
+{%endblock%}

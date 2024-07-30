@@ -26,6 +26,16 @@
                     </form>
                 </div>
             </div>
+            <div class="row mb-4">
+                <div class="col-lg-3">
+                    <label for="chartFilter">Data Range:</label>
+                    <select id="chartFilter" name="chartFilter" class="form-select my-1 mr-sm-2">
+                        <option value="daily">Daily</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="yearly">Yearly</option>
+                    </select>
+                </div>
+            </div>
             <div class="row">
                 <!-- Graphs -->
                 <div class="col-lg-6">
@@ -192,6 +202,27 @@
             }
         }
     });
+    document.getElementById('chartFilter').addEventListener('change', function () {
+        var filterValue = this.value;
+        console.log(filterValue)
+        fetchFilteredData(filterValue);
+    });
+
+    function fetchFilteredData(filter) {
+        fetch(`/chart-data?filter=${filter}`)
+            .then(response => response.json())
+            .then(data => {
+                // Update Revenue Chart
+                revenueChart.data.labels = data.revenue.labels;
+                revenueChart.data.datasets[0].data = data.revenue.values;
+                revenueChart.update();
+
+                // Update Product Quantity Chart
+                productQuantityChart.data.labels = data.product_quantity.labels;
+                productQuantityChart.data.datasets[0].data = data.product_quantity.values;
+                productQuantityChart.update();
+            });
+    }
 
     document.getElementById('generateReportButton').addEventListener('click', function () {
         var reportPeriod = document.getElementById('reportPeriod').value;
@@ -205,5 +236,7 @@
             console.log('To Date:', toDate);
         }
     });
+
+    
 </script>
 {%endblock%}

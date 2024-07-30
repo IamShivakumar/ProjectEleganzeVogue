@@ -69,7 +69,7 @@
                     <div class="promo_image">
                         <img src="{{category.category_image.url}}" alt="">
                     </div>
-                    <div class="promo_link"><a href="#">{{category.category_name}}</a></div>
+                    <div class="promo_link"><a href="{%url 'shop'%}?categories={{category.id}}">{{category.category_name}}</a></div>
                 </div>
             </div>
             {%endif%}
@@ -149,24 +149,7 @@
                 <div class="categories__deal__countdown">
                     <span>Deal Of The Week</span>
                     <h2>Denim Jacket</h2>
-                    <!-- <div class="categories__deal__countdown__timer" id="countdown">
-                            <div class="cd-item">
-                                <span>3</span>
-                                <p>Days</p>
-                            </div>
-                            <div class="cd-item">
-                                <span>1</span>
-                                <p>Hours</p>
-                            </div>
-                            <div class="cd-item">
-                                <span>50</span>
-                                <p>Minutes</p>
-                            </div>
-                            <div class="cd-item">
-                                <span>18</span>
-                                <p>Seconds</p>
-                            </div>
-                        </div> -->
+                    
                     <a href="#" class="primary-btn">Shop now</a>
                 </div>
             </div>

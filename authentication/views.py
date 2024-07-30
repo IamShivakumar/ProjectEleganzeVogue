@@ -10,8 +10,9 @@ from django.views.generic import TemplateView
 from django.views.decorators.cache import cache_control
 from django.utils.decorators import method_decorator
 import re,random,json
+from django.db.models.functions import TruncMonth, TruncYear
 from django.views.decorators.csrf import csrf_exempt
-from django.db.models import Sum
+from django.db.models import Sum,F,Count
 from django.shortcuts import redirect
 from django.core.mail import send_mail
 from django.http import JsonResponse
@@ -34,6 +35,8 @@ class usersignupView(View):
         password = request.POST.get("password")
         confirmPassword = request.POST.get("confirmpassword")
         phone_number = request.POST.get("phone")
+        referral_code=request.POST.get('referral_code')
+        wallet_balance=0
         errors = {}
         # Username Validation
         if CustomUser.objects.filter(username=username).exists():
@@ -56,6 +59,15 @@ class usersignupView(View):
             errors["password"] = "Password Mismatch"
         elif len(password) == 0:
             errors["password"] = "Please enter a password"
+            
+        if referral_code:
+            try:
+                user=CustomUser.objects.get(referral_code=referral_code)
+                user.wallet_balance+=100
+                wallet_balance=100
+            except CustomUser.DoesNotExist:
+                errors['referral_code']="Invalid Referral Code!!"
+
         if errors:
             return render(request, self.template_name, {"errors": errors})
         
@@ -68,6 +80,7 @@ class usersignupView(View):
             'email':email,
             'phone_number':phone_number,
             'password':password,
+            'wallet_balance':wallet_balance,
             'otp':otp
         }
         send_mail(
@@ -108,6 +121,7 @@ class verifyOTPView(View):
                 email=stored_data['email'],
                 phone_number=stored_data['phone_number'],
                 password=stored_data['password'],
+                wallet_balance=stored_data['wallet_balance'],
             )
             user.save()
             del request.session['registration_data']
@@ -247,6 +261,70 @@ def admindashboard(request):
         return redirect("adminlogin")
     else:
         return redirect("adminlogin")
+
+def chart_data(request):
+    filter = request.GET.get('filter', 'daily')
+    if filter == 'daily':
+        # Filter for daily data
+        date_format = "%d %b"
+        revenue_data = Order.objects.filter(payment_status='Paid').annotate(
+            date=F('created_at__date')
+        ).values('date').annotate(
+            total_revenue=Sum('total_price')
+        ).order_by('date')
+    elif filter == 'monthly':
+        # Filter for monthly data
+        date_format = "%b %Y"
+        revenue_data = Order.objects.filter(payment_status='Paid').annotate(
+            date=TruncMonth('created_at')
+        ).values('date').annotate(
+            total_revenue=Sum('total_price')
+        ).order_by('date')
+    elif filter == 'yearly':
+        # Filter for yearly data
+        date_format = "%Y"
+        revenue_data = Order.objects.filter(payment_status='Paid').annotate(
+            date=F('created_at__year')
+        ).values('date').annotate(
+            total_revenue=Sum('total_price')
+        ).order_by('date')
+    else:
+        # Handle unexpected filter values
+        revenue_data = []
+        date_format = "%d %b"
+
+    revenue_labels = []
+    for item in revenue_data:
+        if filter == 'daily':
+            revenue_labels.append(item['date'].strftime(date_format))
+        elif filter == 'monthly':
+            # Combine month and year for monthly format
+            revenue_labels.append(item['date'].strftime(date_format))
+        elif filter == 'yearly':
+            revenue_labels.append(item['date'])
+    
+    revenue_values = [float(item['total_revenue']) for item in revenue_data]
+
+    # Product quantities
+    product_quantities = (
+        Order_items.objects.values("product__product_name")
+        .annotate(total_quantity=Sum("quantity"))
+        .order_by("-total_quantity")
+    )
+    product_labels = [item['product__product_name'] for item in product_quantities]
+    product_values = [item['total_quantity'] for item in product_quantities]
+
+    data = {
+        'revenue': {
+            'labels': revenue_labels,
+            'values': revenue_values,
+        },
+        'product_quantity': {
+            'labels': product_labels,
+            'values': product_values,
+        },
+    }
+    return JsonResponse(data)
 
 
 def emailauth(request):

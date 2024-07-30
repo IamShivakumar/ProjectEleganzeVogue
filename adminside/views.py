@@ -419,13 +419,21 @@ def couponlisting(request):
             print(errors)
             return JsonResponse({"status":False,"errors": errors})
         
+@login_required(login_url="adminlogin")
+@user_passes_test(lambda u :u.is_admin)
+def delete_coupon(request,coupon_id):
+    try:
+        coupons=coupon.objects.get(id=coupon_id)
+        coupons.delete()
+    except coupon.DoesNotExist:
+        pass
+    return redirect('couponlisting')
+        
 #--------------------------------PDF Generation---------------------------------------------
 def generate_pdf(request):
     report_type= request.GET.get('reportType')
     from_date= request.GET.get('fromDate')
     to_date=request.GET.get('toDate')
-    print(from_date,to_date)
-
     orders = Order.objects.none()
     if report_type=="daily":
         orders=Order.objects.filter(created_at__date=datetime.today().date())

@@ -495,6 +495,26 @@
         $('#coupon_error').text('');
     });
 
+    $(document).on('click', '#generate-referral-code', function () {
+        $.ajax({
+            type: "GET",
+            url: "/generate_referral_code/",
+            success: function (response) {
+                Swal.fire({
+                    title: 'Referral Code Generated',
+                    text: response.referral_code,
+                    icon: 'success',
+                    timer: 1000,
+                    showConfirmButton: false,
+                });
+                $('.userData').load(location.href + " .userData")
+            }
+        });
+       
+    });
+
+
+
     $('.razorpaybutton').click(function (e) {
         e.preventDefault();
         var address = $("input[name='selected_address']:checked").val();
@@ -508,7 +528,6 @@
             Swal.fire({ icon: 'error', text: "Please Select the Delivery Address", timer: 1000 })
         }
         else {
-            console.log(total_price)
             var options = {
                 "key": "rzp_test_poghBnnNNEGliw", // Enter the Key ID generated from the Dashboard
                 "amount": 1 * 100, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise

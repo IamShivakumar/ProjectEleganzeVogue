@@ -1,10 +1,13 @@
-from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render, redirect, get_object_or_404
+from django.http import JsonResponse,HttpResponse
+from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from django.template.loader import render_to_string
-from django.contrib.auth import authenticate, login, logout
-from django.db.models import Count,Sum,When,Case
+from decimal import Decimal
+from django.db.models import Sum,F,Q
 from django.views import View
+from reportlab.lib.pagesizes import letter
+from reportlab.lib import colors
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from adminside.models import (
     category,
     products,
@@ -23,11 +26,9 @@ from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from .forms import AddressForm
-from django.views.generic import CreateView
 from django.views.generic import TemplateView
 from django.views.decorators.cache import cache_control
 from django.utils.decorators import method_decorator
-from django.views import View
 from django.views.generic import TemplateView
 
 # Create your views here.
@@ -41,11 +42,29 @@ class shoppageview(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        category_id = self.request.GET.get('category_id')
-        if category_id:
-            prod = products.objects.filter(category_id=category_id)
-        else:
-            prod = products.objects.all()
+        category_ids = self.request.GET.getlist('categories')
+        size_ids=self.request.GET.getlist('sizes')
+        category_ids = [int(id) for id in category_ids]
+        size_ids = [int(id) for id in size_ids]
+        price_order=self.request.GET.get('price')
+        search_query = self.request.GET.get('q', '')
+        prod = products.objects.all()
+        if category_ids:
+            prod=prod.filter(category_id__in=category_ids)
+        if size_ids:
+            prod=prod.filter(productid__size_id__in=size_ids,productid__quantity__gt=0).distinct()
+        if search_query:
+            prod= prod.filter(
+                Q(product_name__icontains=search_query) |
+                Q(description__icontains=search_query)
+            )
+        prod=prod.annotate(
+            discounted_price=F('price') - (F('price') * F('discount') / Decimal(100))
+        )
+        if price_order=='low-to-high':
+            prod=prod.order_by('price')
+        elif price_order=='high-to-low':
+            prod=prod.order_by('-price')
         products_with_sku_count = []
         for product in prod:
             skus = product_sku.objects.filter(product=product)
@@ -61,6 +80,10 @@ class shoppageview(TemplateView):
         context["products"] = products_with_sku_count
         context["categories"] = category.objects.all()
         context["sizes"] = size.objects.all()
+        context["selected_categories"] = category_ids
+        context["selected_sizes"] = size_ids
+        context["selected_price_order"] = price_order
+        context["search_query"]=search_query
         return context
 
 
@@ -84,7 +107,6 @@ def product_detail(request, productid):
             .first()
         )
         productimage = product.productimage.all()
-        # sizesid = product.productid.values_list("size_id", flat=True)
         sizesid = product_sku.objects.filter(
             product=product,
             quantity__gt=0
@@ -310,6 +332,12 @@ def changePassword(request):
     return redirect('homepage')
 
 @login_required
+def generate_referral_code(request):
+    user = request.user
+    user.generate_referral_code()
+    return JsonResponse({'referral_code': user.referral_code})
+
+@login_required
 def addaddress(request):
     if request.method == "POST":
         form = AddressForm(request.POST)
@@ -370,6 +398,9 @@ def checkout(request):
 def placeorder(request):
     if request.method=="POST":
         new_order=Order()
+        if not request.POST.get('selected_address'): 
+            messages.error(request,"Please Add Delivery Address")
+            return redirect('checkout')
         address_id=int(request.POST.get('selected_address'))
         selected_adddress=userAddress.objects.get(id=address_id)
         new_order.address_name=selected_adddress.name
@@ -515,3 +546,72 @@ def applyCoupon(request):
                 'message':'Invalid Coupon Code'
             } 
         return JsonResponse(response)
+    
+def download_invoice(request, order_id):
+    order = Order.objects.get(id=order_id)
+
+    # Create the HttpResponse object with the appropriate PDF headers
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="invoice_{order.id}.pdf"'
+
+    # Create the PDF object, using the response object as its "file."
+    doc = SimpleDocTemplate(response, pagesize=letter)
+
+    # Define styles
+    styles = getSampleStyleSheet()
+    styles.add(ParagraphStyle(name='Center', alignment=1))
+    title_style = styles['Heading1']
+    subtitle_style = styles['Heading2']
+    normal_style = styles['Normal']
+
+    # Title and Subtitle
+    elements = []
+    elements.append(Paragraph("INVOICE", title_style))
+    elements.append(Spacer(1, 12))
+    elements.append(Paragraph(f"Order # {order.id}", subtitle_style))
+    elements.append(Spacer(1, 12))
+
+    # Customer Details
+    customer_info = [
+        ["Username:", order.user.username],
+        ["Email:", order.user.email],
+        ["Phone:", order.user.phone_number],
+        ["Address:", f"{order.address_name},{order.address_house_no},{order.address_street},{order.address_state},{order.address_city},{order.address_pincode}"],
+        ["Order Date:", order.created_at.strftime("%d-%m-%Y")],
+    ]
+    table = Table(customer_info, hAlign='LEFT')
+    elements.append(table)
+    elements.append(Spacer(1, 12))
+
+    # Order Details
+    elements.append(Paragraph("Order Details", styles['Heading3']))
+    order_data = [["Product", "Quantity", "Price"]]
+    for item in order.orderItems.all():
+        total_item_price=item.quantity * item.product.get_discounted_price()
+        order_data.append([item.product.product_name, item.quantity, f"₹{total_item_price}"]) 
+
+    order_table = Table(order_data, hAlign='LEFT')
+    order_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+    ]))
+    elements.append(order_table)
+    elements.append(Spacer(1, 12))
+
+    # Total Amount
+    total_price = f"Total Price: ₹{order.total_price}"
+    elements.append(Paragraph(total_price, styles['Heading3']))
+    elements.append(Spacer(1, 12))
+
+    # Footer
+    elements.append(Paragraph("Thank you for your purchase!", styles['Center']))
+
+    # Build the PDF
+    doc.build(elements)
+
+    return response
