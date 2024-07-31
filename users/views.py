@@ -416,6 +416,14 @@ def placeorder(request):
         if request.POST.get('payment_id'):
             new_order.payment_status='Paid'
             new_order.payment_id=request.POST.get('payment_id')
+        if request.POST.get('payment_method') == "Wallet":
+            if request.user.wallet_balance < Decimal(request.POST.get('total_price')):
+                messages.error(request,f"Insufficient Amount in Wallet!!!")
+                return redirect('checkout')
+            else:
+                user=CustomUser.objects.get(id=request.user.id)
+                user.wallet_balance-=Decimal(request.POST.get('total_price'))
+                user.save()
         new_order.payment_mode=request.POST.get('payment_method')
         cartitem=cart.objects.filter(user_id=request.user).select_related('product')
         total_price=request.POST.get('total_price')
