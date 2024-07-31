@@ -9,7 +9,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
 from users.models import CustomUser
-from adminside.models import category, size, products, product_sku, productImages,Order,Order_items,coupon
+from adminside.models import category, size, products, product_sku, productImages,Order,Order_items,coupon,banners
 from .forms import CouponForm
 from django.views.generic import TemplateView
 from django.views.decorators.cache import cache_control
@@ -336,9 +336,53 @@ def blockuser(request, user_id):
         user.is_active = True  
     user.save()
     return redirect("userlisting")
-
-
 # ----------------------------------------------------------------------------------
+
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+@login_required(login_url="adminlogin")
+@user_passes_test(lambda u :u.is_admin)
+def banner_listing(request):
+    if request.method == "GET":
+        banner_data = banners.objects.all()
+        return render(request, "bannerlisting.html", {"banners": banner_data})
+
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+@login_required(login_url="adminlogin")
+@user_passes_test(lambda u :u.is_admin)
+def addBanner(request):
+    if request.method == "GET":
+        return render(request, "addbanner.html")
+    if request.method=="POST":
+        banner_title = request.POST.get("banner_title")
+        description=request.POST.get("description")
+        banner_image = request.FILES.get("banner_image")
+        errors = {}
+        if len(banner_title) == 0:
+            errors["banner_title"] = "Banner title should Not be empty"
+        if errors:
+            return render(request, "addbanner.html", {"errors": errors})
+        else:
+            banner_create = banners.objects.create(
+                title=banner_title,description=description
+            )
+            if banner_image:
+                banner_create.banner_image = banner_image
+            banner_create.save()
+            return redirect("banner_listing")
+
+@login_required(login_url="adminlogin")
+@user_passes_test(lambda u :u.is_admin)
+def delete_banner(request,banner_id):
+    try:
+        banner=banners.objects.get(id=banner_id)
+        banner.delete()
+    except banners.DoesNotExist:
+        pass
+    return redirect('banner_listing')
+    
+# ----------------------------------------------------------------------------------
+
+
 @login_required(login_url="adminlogin")
 @user_passes_test(lambda u :u.is_admin)
 def orderlisting(request):

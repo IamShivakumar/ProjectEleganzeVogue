@@ -142,3 +142,11 @@ class coupon(models.Model):
 
     class Meta:
         db_table="Coupons"
+
+class banners(models.Model):
+    title=models.CharField(max_length=200,null=False)
+    description=models.TextField()
+    banner_image=models.ImageField(upload_to='banner_images',default='null',null=True,blank=True)
+
+    class Meta:
+        db_table="Banner"

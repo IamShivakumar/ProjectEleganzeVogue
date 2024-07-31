@@ -44,6 +44,9 @@
                 <div class="col-lg-6">
                     <canvas id="productQuantityChart"></canvas>
                 </div>
+                <div class="col-lg-6">
+                    <canvas id="categoryChart"></canvas>
+                </div>
             </div>
             <div class="row mt-5">
                 <!-- Total Orders -->
@@ -125,6 +128,54 @@
                     </div>
                 </div>
             </div>
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="card mb-3">
+                        <div class="card-header">Top 10 Selling Products</div>
+                        <div class="card-body">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Product Name</th>
+                                        <th>Quantity Sold</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for product in top_10_products %}
+                                    <tr>
+                                        <td>{{ product.product__product_name }}</td>
+                                        <td>{{ product.total_quantity }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="card mb-3">
+                        <div class="card-header">Top 10 Selling Categories</div>
+                        <div class="card-body">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Category Name</th>
+                                        <th>Quantity Sold</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for category in top_10_categories %}
+                                    <tr>
+                                        <td>{{ category.category_name }}</td>
+                                        <td>{{ category.total_quantity }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -139,6 +190,9 @@
 <script type="application/json" id="product-quantity-data">
     {{ product_quantity_data|safe }}
 </script>
+<script type="application/json" id="category-data">
+    {{ category_data|safe }}
+</script>
 <script>
     document.getElementById('reportType').addEventListener('change', function () {
         var customDateRange = document.getElementById('customDateRange');
@@ -150,6 +204,8 @@
     });
     var revenueData = JSON.parse(document.getElementById('revenue-data').textContent);
     var productQuantityData = JSON.parse(document.getElementById('product-quantity-data').textContent);
+    var categoryData = JSON.parse(document.getElementById('category-data').textContent);
+
 
     // Revenue Chart
     var ctx1 = document.getElementById('revenueChart').getContext('2d');
@@ -202,6 +258,32 @@
             }
         }
     });
+      // Top Selling Categories Chart
+    var ctx3 = document.getElementById('categoryChart').getContext('2d');
+    var categoryChart = new Chart(ctx3, {
+            type: 'bar',
+            data: {
+                labels: categoryData.labels, // e.g., ["Electronics", "Clothing"]
+                datasets: [{
+                    label: 'Quantity Sold',
+                    data: categoryData.values, // e.g., [1200, 800]
+                    backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                    borderColor: 'rgba(255, 159, 64, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    x: {
+                        beginAtZero: true
+                    },
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+    });
+
     document.getElementById('chartFilter').addEventListener('change', function () {
         var filterValue = this.value;
         console.log(filterValue)

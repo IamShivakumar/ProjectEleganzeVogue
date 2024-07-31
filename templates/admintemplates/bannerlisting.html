@@ -1,0 +1,68 @@
+{% extends "adminbase.html" %}
+{%block content%}
+<div class="page-wrapper">
+    <div class="content">
+        <div class="row">
+            <div class="col-sm-4 col-3">
+                <h4 class="page-title">Banners</h4>
+            </div>
+            <div class="col-sm-8 col-9 text-right m-b-20">
+                <a href="{% url 'addbanner'%}" class="btn btn-primary float-right btn-rounded"><i
+                        class="fa fa-plus"></i>Add Banner</a>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="table-responsive">
+                    <table class="table table-striped custom-table">
+                        <thead>
+                            <tr>
+                                <th style="min-width:50px;">Banner Title</th>
+                                <th>Banner Image</th>
+                                <th>Description</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for banner in banners %}
+                            <tr>
+                                <td>
+                                    <h2>{{banner.title}}</h2>
+                                </td>
+                                <td>
+                                    {% if banner.banner_image %}
+                                    <img class="categories-image" src="{{banner.banner_image.url}}">
+                                    {%else%}
+                                    <span>Image not available</span>
+                                    {%endif%}
+                                </td>
+                                <td>{{banner.description}}</td>
+                                <td> 
+                                    <a href="#" class="btn btn-warning">Edit</a>
+                                    <a href="#delete_category-{{forloop.counter}}" class="btn btn-danger mt-2" data-bs-toggle="modal"
+                                        data-bs-target="#delete_category-{{forloop.counter}}">Delete</a>
+                                </td>
+                            </tr>
+                            {%endfor%}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% for banner in banners %}
+<div  class="modal fade delete-modal" id="delete_category-{{forloop.counter}}" role="dialog" >
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <h3>Are you sure want to Block this Category?{{categories.name}}</h3>
+                <div class="m-t-20"> <a href="#" class="btn btn-white" data-bs-dismiss="modal">Close</a>
+                    <a href="{%url 'delete_banner' banner.id %}" class="btn btn-danger">Delete</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{%endfor%}
+{%endblock%}
