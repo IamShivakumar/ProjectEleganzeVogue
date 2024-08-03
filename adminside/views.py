@@ -16,6 +16,8 @@ from django.views.decorators.cache import cache_control
 from django.contrib.auth.decorators import login_required,user_passes_test
 from django.views.decorators.http import require_POST
 from django.db.models import F
+import base64
+from django.core.files.base import ContentFile
 
 
 # Create your views here.
@@ -182,6 +184,7 @@ def addproducts(request):
         discount = request.POST.get("discount")
         quantity=request.POST.get("quantity")
         primary_image = request.FILES.get("primary_image")
+        cropped_image_data = request.POST.get("cropped_image")
         other_productimages = request.FILES.getlist("other-images")
         selected_sizes = request.POST.getlist("size")
         errors = {}
@@ -213,9 +216,12 @@ def addproducts(request):
         if not created:
             errors['product_exists']="Product Already Available"
 
-        if primary_image:
-            print(primary_image)
-            new_product.primary_image = primary_image
+        if cropped_image_data:
+            format, imgstr = cropped_image_data.split(';base64,')
+            ext = format.split('/')[-1]
+            cropped_image = ContentFile(base64.b64decode(imgstr), name=f"{product_name}_primary.{ext}")
+            new_product.primary_image = cropped_image
+
         new_product.save()
 
         for size_id in selected_sizes:

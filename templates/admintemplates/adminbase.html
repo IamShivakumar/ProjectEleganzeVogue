@@ -13,6 +13,9 @@
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link rel="stylesheet" type="text/css"
         href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css">
+    <!-- Add these in your template's <head> section -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css" rel="stylesheet">
+
     <link rel="stylesheet" type="text/css" href="{% static 'css/adminstyle.css'%}">
 </head>
 
@@ -34,7 +37,8 @@
                         <span>Admin</span>
                     </a>
                     <div class="dropdown-menu">
-                        <a class="dropdown-item" href="{% url 'signout'%}">Logout<i class="bi bi-box-arrow-right"></i></a>
+                        <a class="dropdown-item" href="{% url 'signout'%}">Logout<i
+                                class="bi bi-box-arrow-right"></i></a>
                     </div>
                 </li>
             </ul>
@@ -55,19 +59,23 @@
                             <a href="{% url 'dashboard'%}"><i class="fa fa-dashboard"></i> <span>Dashboard</span></a>
                         </li>
                         <li>
-                            <a href="{% url 'productlisting'%}"><i class="bi bi-archive-fill"></i><span>Products</span></a>
+                            <a href="{% url 'productlisting'%}"><i
+                                    class="bi bi-archive-fill"></i><span>Products</span></a>
                         </li>
                         <li>
                             <a href="{% url 'userlisting'%}"><i class="bi bi-people-fill"></i> <span>Users</span></a>
                         </li>
                         <li class="">
-                            <a href="{% url 'categorylisting'%}"><i class="bi bi-card-list"></i><span>Category</span></a>
+                            <a href="{% url 'categorylisting'%}"><i
+                                    class="bi bi-card-list"></i><span>Category</span></a>
                         </li>
                         <li>
-                            <a href="{% url 'orderlisting'%}"><i class="bi bi-cart-check-fill"></i><span>Orders</span></a>
+                            <a href="{% url 'orderlisting'%}"><i
+                                    class="bi bi-cart-check-fill"></i><span>Orders</span></a>
                         </li>
                         <li>
-                            <a href="{% url 'couponlisting'%}"><i class="bi bi-ticket-detailed"></i><span>Coupons</span></a>
+                            <a href="{% url 'couponlisting'%}"><i
+                                    class="bi bi-ticket-detailed"></i><span>Coupons</span></a>
                         </li>
                         <li>
                             <a href="{%url 'banner_listing'%}"><i class="bi bi-image"></i> <span>banners</span></a>
@@ -78,7 +86,7 @@
         {% block content%}
 
         {% endblock %}
-        
+
     </div>
     <div class="sidebar-overlay" data-reff=""></div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
@@ -88,7 +96,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
     <script src="{% static 'js/adminbase.js'%}"></script>
     {%block script%}
-    
+
     {%endblock%}
 
 </body>
