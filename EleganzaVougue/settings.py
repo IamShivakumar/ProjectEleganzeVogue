@@ -112,7 +112,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'eleganzavogue_db',
-        'USER':'postgres',
+        'USER':os.environ.get('postgres_user'),
         'PASSWORD':os.environ.get('postgres_password'),
         'HOST':'localhost',
         'PORT':'5432',
@@ -120,7 +120,6 @@ DATABASES = {
 }
 
 AUTH_USER_MODEL = 'users.CustomUser'
-
 
 
 # Password validation
