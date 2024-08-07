@@ -28,7 +28,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1','eleganzavogue.shop']
+ALLOWED_HOSTS = ['127.0.0.1','eleganzavogue.shop','www.eleganzavogue.shop','localhost','16.171.200.57']
 
 
 # Application definition
