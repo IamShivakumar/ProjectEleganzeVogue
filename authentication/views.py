@@ -219,7 +219,6 @@ class homepageview(TemplateView):
         template_name = "homepage.html"
         categories = category.objects.all()
         banner=banners.objects.all()
-        product = products.objects.get(id=1)
         context = {"categories": categories, "product": product,'banners':banner}
         return render(request, template_name, context)
 
