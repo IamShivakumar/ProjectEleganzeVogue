@@ -260,7 +260,9 @@ def admindashboard(request):
                 product_labels = [item.get("product__product_name", "Unknown") for item in product_quantities] 
                 product_values = [item.get("total_quantity", 0) for item in product_quantities] 
                 top_10_products = list(product_quantities[:10])
-                most_ordered_product_name = product_quantities.first().get("product__product_name", "N/A") if product_quantities.exists() else "N/A"
+                most_ordered_product = product_quantities.first()
+                most_ordered_product_name = most_ordered_product.get("product__product_name", "N/A") if most_ordered_product else "N/A"
+
             else:
                 product_labels = []
                 product_values = []
@@ -288,8 +290,8 @@ def admindashboard(request):
                 "total_orderCount": order_count ,
                 "pending_order": pending_order ,
                 "recent_orders": recent_orders ,
-                # "total_revenue": total_revenue ,
-                # "most_ordered_product": most_ordered_product_name,
+                "total_revenue": total_revenue ,
+                "most_ordered_product": most_ordered_product_name,
                 "top_10_products": top_10_products ,
                 "top_10_categories": top_10_categories,
                 "active_users": active_users,
@@ -304,8 +306,6 @@ def admindashboard(request):
                 ),
             }
             return render(request, "dashboard.html", context)
-        return redirect("adminlogin")
-    else:
         return redirect("adminlogin")
 
 
