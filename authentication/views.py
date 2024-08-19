@@ -251,9 +251,8 @@ def admindashboard(request):
                 .annotate(total_quantity=Sum("quantity"))
                 .order_by("-total_quantity")
             )
-
-            product_labels = [item["product__product_name"] for item in product_quantities] if product_quantities else []
-            product_values = [item["total_quantity"] for item in product_quantities] if product_quantities else []
+            product_labels = [item.get("product__product_name", "Unknown") for item in product_quantities] if product_quantities else []
+            product_values = [item.get("total_quantity", 0) for item in product_quantities] if product_quantities else []
             top_10_products = list(product_quantities[:10]) if product_quantities else []
             most_ordered_product_name = product_quantities.first().get("product__product_name", "N/A") if product_quantities.exists() else "N/A"
 
@@ -265,20 +264,20 @@ def admindashboard(request):
                 .order_by("-total_quantity")
             )
 
-            category_labels = [item["category_name"] for item in category_data] if category_data else []
-            category_values = [item["total_quantity"] for item in category_data] if category_data else []
+            category_labels = [item.get("category_name", "Unknown") for item in category_data] if category_data else []
+            category_values = [item.get("total_quantity", 0) for item in category_data] if category_data else []
             top_10_categories = list(category_data[:10]) if category_data else []
 
             active_users = CustomUser.objects.filter(is_active=True).count()
             context = {
-                "total_orderCount": order_count if order_count > 0 else 0,
-                "pending_order": pending_order if pending_order > 0 else 0,
-                "recent_orders": recent_orders if recent_orders else [],
-                "total_revenue": total_revenue if total_revenue else 0,
+                "total_orderCount": order_count ,
+                "pending_order": pending_order ,
+                "recent_orders": recent_orders ,
+                "total_revenue": total_revenue ,
                 "most_ordered_product": most_ordered_product_name,
                 "top_10_products": top_10_products ,
                 "top_10_categories": top_10_categories,
-                "active_users": active_users if active_users > 0 else 0,
+                "active_users": active_users,
                 "revenue_data": json.dumps(
                     {"labels": revenue_labels, "values": revenue_values}
                 ),
