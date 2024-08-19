@@ -281,8 +281,8 @@ def admindashboard(request):
                 category_labels = []
                 category_values = []
 
-            top_10_products = product_quantities[:10] if product_quantities.exists() else []
-            top_10_categories = category_data[:10] if category_data.exists() else []
+            top_10_products = list(product_quantities[:10]) if product_quantities.exists() else []
+            top_10_categories = list(category_data[:10]) if category_data.exists() else []
 
             active_users = CustomUser.objects.filter(is_active=True).count()
             context = {
