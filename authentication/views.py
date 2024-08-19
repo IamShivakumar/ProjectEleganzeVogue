@@ -286,23 +286,23 @@ def admindashboard(request):
 
             active_users = CustomUser.objects.filter(is_active=True).count()
             context = {
-                "total_orderCount": order_count,
-                "pending_order": pending_order,
-                "recent_orders": recent_orders,
-                "total_revenue": total_revenue,
+                "total_orderCount": order_count if order_count > 0 else 0,
+                "pending_order": pending_order if pending_order > 0 else 0,
+                "recent_orders": recent_orders if recent_orders else [],
+                "total_revenue": total_revenue if total_revenue else 0,
                 "most_ordered_product": most_ordered_product_name,
-                'top_10_products': top_10_products,
-                'top_10_categories': top_10_categories,
-                "active_users": active_users,
+                "top_10_products": list(top_10_products) if top_10_products else [],
+                "top_10_categories": list(top_10_categories) if top_10_categories else [],
+                "active_users": active_users if active_users > 0 else 0,
                 "revenue_data": json.dumps(
                     {"labels": revenue_labels, "values": revenue_values}
-                ),
+                ) if revenue_labels and revenue_values else json.dumps({"labels": [], "values": []}),
                 "product_quantity_data": json.dumps(
                     {"labels": product_labels, "values": product_values}
-                ),
+                ) if product_labels and product_values else json.dumps({"labels": [], "values": []}),
                 "category_data": json.dumps(
                     {"labels": category_labels, "values": category_values}
-                ),
+                ) if category_labels and category_values else json.dumps({"labels": [], "values": []}),
             }
             return render(request, "dashboard.html", context)
         return redirect("adminlogin")
