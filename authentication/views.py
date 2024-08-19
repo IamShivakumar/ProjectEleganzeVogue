@@ -241,20 +241,31 @@ def admindashboard(request):
                 .annotate(total_revenue=Sum("total_price"))
                 .order_by("created_at__date")
             )
-            revenue_labels = [
-                item["created_at__date"].strftime("%b %Y") for item in revenue_data
-            ] if revenue_data else []
-            revenue_values = [float(item["total_revenue"]) for item in revenue_data] if revenue_data else []
+            if revenue_data:
+                revenue_labels = [
+                    item["created_at__date"].strftime("%b %Y") for item in revenue_data
+                ]
+                revenue_values = [float(item["total_revenue"]) for item in revenue_data] 
+            else:
+                revenue_labels=[]
+                revenue_values=[]
+
             # For Product quanitites
             product_quantities = (
                 Order_items.objects.values("product__product_name")
                 .annotate(total_quantity=Sum("quantity"))
                 .order_by("-total_quantity")
             )
-            product_labels = [item.get("product__product_name", "Unknown") for item in product_quantities] if product_quantities else []
-            product_values = [item.get("total_quantity", 0) for item in product_quantities] if product_quantities else []
-            top_10_products = list(product_quantities[:10]) if product_quantities else []
-            most_ordered_product_name = product_quantities.first().get("product__product_name", "N/A") if product_quantities.exists() else "N/A"
+            if product_quantities:
+                product_labels = [item.get("product__product_name", "Unknown") for item in product_quantities] 
+                product_values = [item.get("total_quantity", 0) for item in product_quantities] 
+                top_10_products = list(product_quantities[:10])
+                most_ordered_product_name = product_quantities.first().get("product__product_name", "N/A") if product_quantities.exists() else "N/A"
+            else:
+                product_labels = []
+                product_values = []
+                top_10_products = []
+                most_ordered_product_name = "N/A"
 
             category_data = (
                 Order_items.objects.values(
@@ -263,10 +274,14 @@ def admindashboard(request):
                 .annotate(total_quantity=Sum("quantity"))
                 .order_by("-total_quantity")
             )
-
-            category_labels = [item.get("category_name", "Unknown") for item in category_data] if category_data else []
-            category_values = [item.get("total_quantity", 0) for item in category_data] if category_data else []
-            top_10_categories = list(category_data[:10]) if category_data else []
+            if category_data:
+                category_labels = [item.get("category_name", "Unknown") for item in category_data] 
+                category_values = [item.get("total_quantity", 0) for item in category_data]
+                top_10_categories = list(category_data[:10])
+            else:
+                category_labels = []
+                category_values = []
+                top_10_categories = []
 
             active_users = CustomUser.objects.filter(is_active=True).count()
             context = {
