@@ -241,7 +241,7 @@ def admindashboard(request):
                 .annotate(total_revenue=Sum("total_price"))
                 .order_by("created_at__date")
             )
-            if revenue_data.exists():
+            if revenue_data is not None and revenue_data.exists():
                 revenue_labels = [
                     item["created_at__date"].strftime("%b %Y") for item in revenue_data
                 ]
@@ -255,7 +255,7 @@ def admindashboard(request):
                 .annotate(total_quantity=Sum("quantity"))
                 .order_by("-total_quantity")
             )
-            if product_quantities.exists():
+            if product_quantities is not None and product_quantities.exists():
                 product_labels = [
                     item["product__product_name"] for item in product_quantities
                 ]
@@ -276,7 +276,7 @@ def admindashboard(request):
                 .order_by("-total_quantity")
             )
 
-            if category_data.exists():
+            if category_data is not None and  category_data.exists():
                 category_labels = [item["category_name"] for item in category_data]
                 category_values = [item["total_quantity"] for item in category_data]
                 top_10_categories = list(category_data[:10])
@@ -297,13 +297,13 @@ def admindashboard(request):
                 "active_users": active_users if active_users > 0 else 0,
                 "revenue_data": json.dumps(
                     {"labels": revenue_labels, "values": revenue_values}
-                ) if revenue_labels and revenue_values else json.dumps({"labels": [], "values": []}),
+                ),
                 "product_quantity_data": json.dumps(
                     {"labels": product_labels, "values": product_values}
-                ) if product_labels and product_values else json.dumps({"labels": [], "values": []}),
+                ) ,
                 "category_data": json.dumps(
                     {"labels": category_labels, "values": category_values}
-                ) if category_labels and category_values else json.dumps({"labels": [], "values": []}),
+                ),
             }
             return render(request, "dashboard.html", context)
         return redirect("adminlogin")
