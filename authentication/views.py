@@ -282,7 +282,10 @@ def admindashboard(request):
 
             
             most_ordered_product = product_quantities.first()
-            most_ordered_product = most_ordered_product["product__product_name"]
+            if most_ordered_product:
+                most_ordered_product = most_ordered_product["product__product_name"]
+            else:
+                most_ordered_product = None
             active_users = CustomUser.objects.filter(is_active=True).count()
             context = {
                 "total_orderCount": order_count,
