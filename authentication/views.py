@@ -233,7 +233,7 @@ def admindashboard(request):
             recent_orders = Order.objects.all().order_by("-created_at")
             total_revenue = Order.objects.filter(payment_status="Paid").aggregate(
                 total_sum=Sum("total_price")
-            )["total_sum"]
+            ).get("total_sum", 0)
             # Prepare Revenune Data
             revenue_data = (
                 Order.objects.filter(payment_status="Paid")
@@ -241,32 +241,21 @@ def admindashboard(request):
                 .annotate(total_revenue=Sum("total_price"))
                 .order_by("created_at__date")
             )
-            if revenue_data is not None and revenue_data.exists():
-                revenue_labels = [
-                    item["created_at__date"].strftime("%b %Y") for item in revenue_data
-                ]
-                revenue_values = [float(item["total_revenue"]) for item in revenue_data]
-            else:
-                revenue_labels = []
-                revenue_values = []
+            revenue_labels = [
+                item["created_at__date"].strftime("%b %Y") for item in revenue_data
+            ] if revenue_data else []
+            revenue_values = [float(item["total_revenue"]) for item in revenue_data] if revenue_data else []
             # For Product quanitites
             product_quantities = (
                 Order_items.objects.values("product__product_name")
                 .annotate(total_quantity=Sum("quantity"))
                 .order_by("-total_quantity")
             )
-            if product_quantities is not None and product_quantities.exists():
-                product_labels = [
-                    item["product__product_name"] for item in product_quantities
-                ]
-                product_values = [item["total_quantity"] for item in product_quantities]
-                top_10_products = list(product_quantities[:10]) if product_quantities else []
-                most_ordered_product_name = product_quantities.first().get("product__product_name", "N/A")
-            else:
-                product_labels = []
-                product_values = []
-                top_10_products=[]
-                most_ordered_product_name = "N/A"
+
+            product_labels = [item["product__product_name"] for item in product_quantities] if product_quantities else []
+            product_values = [item["total_quantity"] for item in product_quantities] if product_quantities else []
+            top_10_products = list(product_quantities[:10]) if product_quantities else []
+            most_ordered_product_name = product_quantities.first().get("product__product_name", "N/A") if product_quantities.exists() else "N/A"
 
             category_data = (
                 Order_items.objects.values(
@@ -276,14 +265,9 @@ def admindashboard(request):
                 .order_by("-total_quantity")
             )
 
-            if category_data is not None and  category_data.exists():
-                category_labels = [item["category_name"] for item in category_data]
-                category_values = [item["total_quantity"] for item in category_data]
-                top_10_categories = list(category_data[:10])
-            else:
-                category_labels = []
-                category_values = []
-                top_10_categories=[]
+            category_labels = [item["category_name"] for item in category_data] if category_data else []
+            category_values = [item["total_quantity"] for item in category_data] if category_data else []
+            top_10_categories = list(category_data[:10]) if category_data else []
 
             active_users = CustomUser.objects.filter(is_active=True).count()
             context = {
