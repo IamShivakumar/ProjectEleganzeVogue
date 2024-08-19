@@ -241,10 +241,14 @@ def admindashboard(request):
                 .annotate(total_revenue=Sum("total_price"))
                 .order_by("created_at__date")
             )
-            revenue_labels = [
-                item["created_at__date"].strftime("%b %Y") for item in revenue_data
-            ]
-            revenue_values = [float(item["total_revenue"]) for item in revenue_data]
+            if revenue_data.exists():
+                revenue_labels = [
+                    item["created_at__date"].strftime("%b %Y") for item in revenue_data
+                ]
+                revenue_values = [float(item["total_revenue"]) for item in revenue_data]
+            else:
+                revenue_labels = []
+                revenue_values = []
             # For Product quanitites
             product_quantities = (
                 Order_items.objects.values("product__product_name")
@@ -270,20 +274,15 @@ def admindashboard(request):
                 .order_by("-total_quantity")
             )
 
-            category_labels = [item["category_name"] for item in category_data]
-            category_values = [item["total_quantity"] for item in category_data]
-            top_10_products=(
-                Order_items.objects
-                .values('product__product_name')
-                .annotate(total_quantity=Sum('quantity'))
-                .order_by('-total_quantity')[:10]
-            )
-            top_10_categories = (
-                Order_items.objects
-                .values(category_name=F('product__category__category_name'))  # Adjust this if necessary
-                .annotate(total_quantity=Sum('quantity'))
-                .order_by('-total_quantity')[:10]
-            )
+            if category_data.exists():
+                category_labels = [item["category_name"] for item in category_data]
+                category_values = [item["total_quantity"] for item in category_data]
+            else:
+                category_labels = []
+                category_values = []
+
+            top_10_products = product_quantities[:10] if product_quantities.exists() else []
+            top_10_categories = category_data[:10] if category_data.exists() else []
 
             active_users = CustomUser.objects.filter(is_active=True).count()
             context = {
