@@ -260,10 +260,12 @@ def admindashboard(request):
                     item["product__product_name"] for item in product_quantities
                 ]
                 product_values = [item["total_quantity"] for item in product_quantities]
+                top_10_products = list(product_quantities[:10]) if product_quantities else []
                 most_ordered_product_name = product_quantities.first().get("product__product_name", "N/A")
             else:
                 product_labels = []
                 product_values = []
+                top_10_products=[]
                 most_ordered_product_name = "N/A"
 
             category_data = (
@@ -277,22 +279,11 @@ def admindashboard(request):
             if category_data.exists():
                 category_labels = [item["category_name"] for item in category_data]
                 category_values = [item["total_quantity"] for item in category_data]
+                top_10_categories = list(category_data[:10])
             else:
                 category_labels = []
                 category_values = []
-
-            top_10_products = (
-                Order_items.objects
-                .values("product__product_name")
-                .annotate(total_quantity=Sum("quantity"))
-                .order_by("-total_quantity")[:10]
-            )
-            top_10_categories = (
-                Order_items.objects
-                .values(category_name=F("product__category__category_name"))
-                .annotate(total_quantity=Sum("quantity"))
-                .order_by("-total_quantity")[:10]
-            )
+                top_10_categories=[]
 
             active_users = CustomUser.objects.filter(is_active=True).count()
             context = {
@@ -301,8 +292,8 @@ def admindashboard(request):
                 "recent_orders": recent_orders if recent_orders else [],
                 "total_revenue": total_revenue if total_revenue else 0,
                 "most_ordered_product": most_ordered_product_name,
-                "top_10_products": list(top_10_products) if top_10_products else [],
-                "top_10_categories": list(top_10_categories) if top_10_categories else [],
+                "top_10_products": top_10_products ,
+                "top_10_categories": top_10_categories,
                 "active_users": active_users if active_users > 0 else 0,
                 "revenue_data": json.dumps(
                     {"labels": revenue_labels, "values": revenue_values}
