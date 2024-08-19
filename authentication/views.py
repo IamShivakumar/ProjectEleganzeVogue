@@ -281,8 +281,18 @@ def admindashboard(request):
                 category_labels = []
                 category_values = []
 
-            top_10_products = list(product_quantities[:10]) if product_quantities.exists() else []
-            top_10_categories = list(category_data[:10]) if category_data.exists() else []
+            top_10_products = (
+                Order_items.objects
+                .values("product__product_name")
+                .annotate(total_quantity=Sum("quantity"))
+                .order_by("-total_quantity")[:10]
+            )
+            top_10_categories = (
+                Order_items.objects
+                .values(category_name=F("product__category__category_name"))
+                .annotate(total_quantity=Sum("quantity"))
+                .order_by("-total_quantity")[:10]
+            )
 
             active_users = CustomUser.objects.filter(is_active=True).count()
             context = {
