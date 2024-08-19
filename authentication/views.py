@@ -251,10 +251,16 @@ def admindashboard(request):
                 .annotate(total_quantity=Sum("quantity"))
                 .order_by("-total_quantity")
             )
-            product_labels = [
-                item["product__product_name"] for item in product_quantities
-            ]
-            product_values = [item["total_quantity"] for item in product_quantities]
+            if product_quantities.exists():
+                product_labels = [
+                    item["product__product_name"] for item in product_quantities
+                ]
+                product_values = [item["total_quantity"] for item in product_quantities]
+                most_ordered_product_name = product_quantities.first().get("product__product_name", "N/A")
+            else:
+                product_labels = []
+                product_values = []
+                most_ordered_product_name = "N/A"
 
             category_data = (
                 Order_items.objects.values(
@@ -279,20 +285,13 @@ def admindashboard(request):
                 .order_by('-total_quantity')[:10]
             )
 
-
-            
-            most_ordered_product = product_quantities.first()
-            if most_ordered_product:
-                most_ordered_product = most_ordered_product["product__product_name"]
-            else:
-                most_ordered_product = "N/A"
             active_users = CustomUser.objects.filter(is_active=True).count()
             context = {
                 "total_orderCount": order_count,
                 "pending_order": pending_order,
                 "recent_orders": recent_orders,
                 "total_revenue": total_revenue,
-                "most_ordered_product": most_ordered_product,
+                "most_ordered_product": most_ordered_product_name,
                 'top_10_products': top_10_products,
                 'top_10_categories': top_10_categories,
                 "active_users": active_users,
