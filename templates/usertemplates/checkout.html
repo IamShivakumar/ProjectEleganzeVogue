@@ -89,13 +89,11 @@
                             </ul>
                             <p class="text-danger">Select from Below Payment Method*</p>
                             <div class="checkout__input__checkbox">
-                                {%if totalprice < 3000 %}
                                 <label for="cash-on-delivery">
                                     Cash On delivery
                                     <input type="radio" id="cash-on-delivery" name="payment_method" value="Cash On Delivery" >
                                     <span class="checkmark"></span>
                                 </label>
-                                {%endif%}
                                 <label for="Wallet">
                                     Wallet
                                     <input type="radio" id="Wallet" name="payment_method" value="Wallet">
