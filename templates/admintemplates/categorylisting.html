@@ -30,7 +30,7 @@
                             <tr>
                                 <th style="min-width:50px;">Category Name</th>
                                 <th>Category Image</th>
-                                <th>Quantity</th>
+                                <th>Discount</th>
                                 <th style="min-width: 110px;">Status</th>
                                 <th>Action</th>
                             </tr>
@@ -48,7 +48,7 @@
                                     <span>Image not available</span>
                                     {%endif%}
                                 </td>
-                                <td>200</td>
+                                <td>{{categories.discount}}</td>
                                 <td>
                                     {% if categories.is_active%}
                                     <span class="custom-badge status-green">Active</span>
